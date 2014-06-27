@@ -159,60 +159,59 @@
 			removeClass(this.tooltip_max, 'hide');
 		}
 
-		this.orientation = this.element.data('slider-orientation')||options.orientation;
-		switch(this.orientation) {
-			case 'vertical':
-				this.sliderElem.addClass('slider-vertical');
-				this.stylePos = 'top';
-				this.mousePos = 'pageY';
-				this.sizePos = 'offsetHeight';
-				this.tooltip.addClass('right')[0].style.left = '100%';
-				this.tooltip_min.addClass('right')[0].style.left = '100%';
-				this.tooltip_max.addClass('right')[0].style.left = '100%';
-				break;
-			default:
-				this.sliderElem
-					.addClass('slider-horizontal')
-					.css('width', origWidth);
-				this.orientation = 'horizontal';
-				this.stylePos = 'left';
-				this.mousePos = 'pageX';
-				this.sizePos = 'offsetWidth';
-				this.tooltip.addClass('top')[0].style.top = -this.tooltip.outerHeight() - 14 + 'px';
-				this.tooltip_min.addClass('top')[0].style.top = -this.tooltip_min.outerHeight() - 14 + 'px';
-				this.tooltip_max.addClass('top')[0].style.top = -this.tooltip_max.outerHeight() - 14 + 'px';
-				break;
+		this.orientation = this.options.orientation;
+		if(this.orientation === 'vertical') {
+			addClass(this.sliderElem,'slider-vertical');
+			
+			this.stylePos = 'top';
+			this.mousePos = 'pageY';
+			this.sizePos = 'offsetHeight';
+
+			addClass(this.tooltip, 'right');
+			this.tooltip.style.left = '100%';
+			
+			addClass(this.tooltip_min, 'right');
+			this.tooltip_min.style.left = '100%';
+
+			addClass(this.tooltip_max, 'right');
+			this.tooltip_max.style.left = '100%';
+		} else {
+			addClass(this.sliderElem, 'slider-horizontal');
+			this.sliderElem.style.width = origWidth;
+
+			this.orientation = 'horizontal';
+			this.stylePos = 'left';
+			this.mousePos = 'pageX';
+			this.sizePos = 'offsetWidth';
+			
+			addClass(this.tooltip, 'top');
+			this.tooltip.style.top = -this.tooltip.outerHeight - 14 + 'px';
+			
+			addClass(this.tooltip_min, 'top');
+			this.tooltip_min.style.top = -this.tooltip_min.outerHeight - 14 + 'px';
+
+			addClass(this.tooltip_max, 'top');
+			this.tooltip_max.style.top = -this.tooltip_max.outerHeight - 14 + 'px';
 		}
 
-		var self = this;
-		$.each(['min',
-				'max',
-				'step',
-				'precision',
-				'value',
-				'reversed',
-				'handle'
-			], function(i, attr) {
-				if (typeof el.data('slider-' + attr) !== 'undefined') {
-					self[attr] = el.data('slider-' + attr);
-				} else if (typeof options[attr] !== 'undefined') {
-					self[attr] = options[attr];
-				} else if (typeof el.prop(attr) !== 'undefined') {
-					self[attr] = el.prop(attr);
-				} else {
-					self[attr] = 0; // to prevent empty string issues in calculations in IE
-				}
-		});
 
-		if (this.value instanceof Array) {
-			if (updateSlider && !this.range) {
-				this.value = this.value[0];
-			} else {
-				this.range = true;
-			}
-		} else if (this.range) {
+
+
+
+
+		/********************************************************
+
+					Everything below is refactored
+
+		*********************************************************/
+
+
+
+		if (this.options.value instanceof Array) {
+			this.options.range = true;
+		} else if (this.options.range) {
 			// User wants a range, but value is not an array
-			this.value = [this.value, this.max];
+			this.options.value = [this.options.value, this.options.max];
 		}
 
 		this.selection = this.element.data('slider-selection')||options.selection;
@@ -248,7 +247,7 @@
 		this.tooltip_separator = options.tooltip_separator;
 		this.tooltip_split = options.tooltip_split;
 
-		this.setValue(this.value);
+		this.setValue(this.options.value);
 
 		this.handle1.on({
 			keydown: $.proxy(this.keydown, this, 0)
@@ -380,7 +379,7 @@
 
 			if (this.range) {
 				this.tooltipInner.text(
-					this.formater(this.value[0]) + this.tooltip_separator + this.formater(this.value[1])
+					this.formater(this.options.value[0]) + this.tooltip_separator + this.formater(this.options.value[1])
 				);
 				this.tooltip[0].style[this.stylePos] = (positionPercentages[1] + positionPercentages[0])/2 + '%';
 				if (this.orientation === 'vertical') {
@@ -395,10 +394,10 @@
 					this.tooltip.css('margin-left', -this.tooltip.outerWidth() / 2 + 'px');
 				}
 				this.tooltipInner_min.text(
-					this.formater(this.value[0])
+					this.formater(this.options.value[0])
 				);
 				this.tooltipInner_max.text(
-					this.formater(this.value[1])
+					this.formater(this.options.value[1])
 				);
 
 				this.tooltip_min[0].style[this.stylePos] = positionPercentages[0] + '%';
@@ -415,7 +414,7 @@
 				}
 			} else {
 				this.tooltipInner.text(
-					this.formater(this.value[0])
+					this.formater(this.options.value[0])
 				);
 				this.tooltip[0].style[this.stylePos] = positionPercentages[0] + '%';
 				if (this.orientation === 'vertical') {
@@ -625,7 +624,7 @@
                     val[1] = (Math.min(this.max, this.min + Math.round((this.diff * this.percentage[1]/100)/this.step)*this.step));
                     val[1] = this.applyPrecision(val[1]);
                 }
-				this.value = val;
+				this.options.value = val;
 			} else {
 				val = (this.min + Math.round((this.diff * this.percentage[0]/100)/this.step)*this.step);
 				if (val < this.min) {
@@ -636,7 +635,7 @@
 				}
 				val = parseFloat(val);
 				val = this.applyPrecision(val);
-				this.value = [val, this.value[1]];
+				this.options.value = [val, this.options.value[1]];
 			}
 			return val;
 		},
@@ -670,39 +669,39 @@
 
 		getValue: function() {
 			if (this.range) {
-				return this.value;
+				return this.options.value;
 			}
-			return this.value[0];
+			return this.options.value[0];
 		},
 
 		setValue: function(val, triggerSlideEvent) {
 			if (!val) {
 				val = 0;
 			}
-			this.value = this.validateInputValue(val);
+			this.options.value = this.validateInputValue(val);
 
 			if (this.range) {
-				this.value[0] = this.applyPrecision(this.value[0]);
-				this.value[1] = this.applyPrecision(this.value[1]); 
+				this.options.value[0] = this.applyPrecision(this.options.value[0]);
+				this.options.value[1] = this.applyPrecision(this.options.value[1]); 
 
-				this.value[0] = Math.max(this.min, Math.min(this.max, this.value[0]));
-				this.value[1] = Math.max(this.min, Math.min(this.max, this.value[1]));
+				this.options.value[0] = Math.max(this.min, Math.min(this.max, this.options.value[0]));
+				this.options.value[1] = Math.max(this.min, Math.min(this.max, this.options.value[1]));
 			} else {
-				this.value = this.applyPrecision(this.value);
-				this.value = [ Math.max(this.min, Math.min(this.max, this.value))];
+				this.options.value = this.applyPrecision(this.options.value);
+				this.options.value = [ Math.max(this.min, Math.min(this.max, this.options.value))];
 				this.handle2.addClass('hide');
 				if (this.selection === 'after') {
-					this.value[1] = this.max;
+					this.options.value[1] = this.max;
 				} else {
-					this.value[1] = this.min;
+					this.options.value[1] = this.min;
 				}
 			}
 
 			this.diff = this.max - this.min;
 			if (this.diff > 0) {
 				this.percentage = [
-					(this.value[0] - this.min) * 100 / this.diff,
-					(this.value[1] - this.min) * 100 / this.diff,
+					(this.options.value[0] - this.min) * 100 / this.diff,
+					(this.options.value[1] - this.min) * 100 / this.diff,
 					this.step * 100 / this.diff
 				];
 			} else {
@@ -713,7 +712,7 @@
 
 
 			if(triggerSlideEvent === true) {
-				var slideEventValue = this.range ? this.value : this.value[0];
+				var slideEventValue = this.range ? this.options.value : this.options.value[0];
 				this.element
 					.trigger({
 						'type': 'slide',
@@ -782,6 +781,12 @@
 	};
 
 
+
+
+
+
+
+
 	/******************************+
 				
 				Helpers
@@ -799,6 +804,34 @@
 
 		element.className = newClasses.trim();
 	}
+
+	function addClass(element, classString) {
+		var classes = classString.split(" ");
+		var newClasses = element.className;
+
+		for(var i = 0; i < classes.length; i++) {
+			var classTag = classes[i];
+			var regex = new RegExp("(?:\\s|^)" + classTag + "(?:\\s|$)");
+			var ifClassExists = regex.test(newClasses);
+			
+			if(!ifClassExists) {
+				newClasses += " " + classTag;
+			}
+		}
+
+		element.className = newClasses.trim();
+	}
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -893,5 +926,3 @@
 	// $.fn.slider.Constructor = Slider;
 
 })( window.jQuery );
-
-/* vim: set noexpandtab tabstop=4 shiftwidth=4 autoindent: */
