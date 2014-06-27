@@ -50,8 +50,8 @@ function Slider( element, options ) {
 			var dataName = "data-slider-" + optName;
 			dataValString = msglist.getAttribute(dataName);
 		}
-		// This is the best way I can think to do this
-		return eval(dataValString);
+
+		return JSON.parse(dataValString);
 	}
 }
 
