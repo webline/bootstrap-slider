@@ -24,6 +24,13 @@
 		callingContextNotSliderInstance : "Calling context element does not have instance of Slider bound to it. Check your code to make sure the JQuery object returned from the call to the slider() initializer is calling the method"
 	};
 
+
+
+	/*************************************************
+					
+						CONSTRUCTOR
+
+	**************************************************/
 	function Slider(element, options) {
 		/*************************************************
 					
@@ -194,19 +201,6 @@
 			this.tooltip_max.style.top = -this.tooltip_max.outerHeight - 14 + 'px';
 		}
 
-
-
-
-
-
-		/********************************************************
-
-					Everything below is refactored
-
-		*********************************************************/
-
-
-
 		if (this.options.value instanceof Array) {
 			this.options.range = true;
 		} else if (this.options.range) {
@@ -214,91 +208,86 @@
 			this.options.value = [this.options.value, this.options.max];
 		}
 
-		this.selection = this.element.data('slider-selection')||options.selection;
-		this.selectionEl = this.sliderElem.find('.slider-selection');
-		if (this.selection === 'none') {
-			this.selectionEl.addClass('hide');
+		this.selectionEl = sliderTrackSelection;
+		if (this.options.selection === 'none') {
+			addClass(this.selectionEl, 'hide');
 		}
 
-		this.selectionElStyle = this.selectionEl[0].style;
+		this.selectionElStyle = this.selectionEl.style;
 
-		this.handle1 = this.sliderElem.find('.slider-handle:first');
-		this.handle1Stype = this.handle1[0].style;
+		this.handle1 = sliderMinHandle;
+		this.handle1Stype = this.handle1.style;
 
-		this.handle2 = this.sliderElem.find('.slider-handle:last');
-		this.handle2Stype = this.handle2[0].style;
+		this.handle2 = sliderMaxHandle;
+		this.handle2Stype = this.handle2.style;
 
 		if (updateSlider === true) {
 			// Reset classes
-			this.handle1.removeClass('round triangle');
-			this.handle2.removeClass('round triangle hide');
+			removeClass(this.handle1, 'round triangle');
+			removeClass(this.handle2, 'round triangle hide');
 		}
 
 		var availableHandleModifiers = ['round', 'triangle', 'custom'];
-		if (availableHandleModifiers.indexOf(this.handle) !== -1){
-			this.handle1.addClass(this.handle);
-			this.handle2.addClass(this.handle);
+		var isValidHandleType = availableHandleModifiers.indexOf(this.options.handle) !== -1;
+		if (isValidHandleType) {
+			addClass(this.handle1, this.options.handle);
+			addClass(this.handle2, this.options.handle);
 		}
 
-		this.offset = this.sliderElem.offset();
-		this.size = this.sliderElem[0][this.sizePos];
-		this.formater = options.formater;
+		this.offset = this.sliderElem.offset(); // TODO: revisit
+		this.size = this.sliderElem[this.sizePos];
 		
-		this.tooltip_separator = options.tooltip_separator;
-		this.tooltip_split = options.tooltip_split;
-
 		this.setValue(this.options.value);
 
-		this.handle1.on({
-			keydown: $.proxy(this.keydown, this, 0)
-		});
-		this.handle2.on({
-			keydown: $.proxy(this.keydown, this, 1)
-		});
+		/******************************************
+					
+						Bind Events
+
+		******************************************/
+
+		// Bind keyboard handlers
+		this.handle1.addEventListener("keydown", this.keydown.bind(this, 0), false);
+		this.handle2.addEventListener("keydown", this.keydown.bind(this, 1), false);
 
 		if (this.touchCapable) {
-			// Touch: Bind touch events:
-			this.sliderElem.on({
-				touchstart: $.proxy(this.mousedown, this)
-			});
+			// Bind touch handlers
+			this.sliderElem.addEventListener("touchstart", this.mousedown.bind(this, 0), false);
+		} else {
+			// Bind mouse handlers
+			this.sliderElem.addEventListener("mousedown", this.mousedown.bind(this), false);
 		}
-		// Bind mouse events:
-		this.sliderElem.on({
-			mousedown: $.proxy(this.mousedown, this)
-		});
 
-		if(tooltip === 'hide') {
-			this.tooltip.addClass('hide');
-			this.tooltip_min.addClass('hide');
-			this.tooltip_max.addClass('hide');
+		// Bind tooltip-related handlers
+		if(this.options.tooltip === 'hide') {
+			addClass(this.tooltip, 'hide');
+			addClass(this.tooltip_min, 'hide');
+			addClass(this.tooltip_max, 'hide');
 		} else if(tooltip === 'always') {
 			this.showTooltip();
 			this.alwaysShowTooltip = true;
 		} else {
-			this.sliderElem.on({
-				mouseenter: $.proxy(this.showTooltip, this),
-				mouseleave: $.proxy(this.hideTooltip, this)
-			});
-			this.handle1.on({
-				focus: $.proxy(this.showTooltip, this),
-				blur: $.proxy(this.hideTooltip, this)
-			});
-			this.handle2.on({
-				focus: $.proxy(this.showTooltip, this),
-				blur: $.proxy(this.hideTooltip, this)
-			});
+			this.sliderElem.addEventListener("mouseenter", this.showTooltip.bind(this), false);
+			this.sliderElem.addEventListener("mouseleave", this.hideTooltip.bind(this), false);
+
+			this.handle1.addEventListener("focus", this.showTooltip.bind(this), false);
+			this.handle1.addEventListener("blur", this.hideTooltip.bind(this), false);
+
+			this.handle2.addEventListener("focus", this.showTooltip.bind(this), false);
+			this.handle2.addEventListener("blur", this.hideTooltip.bind(this), false);
 		}
 
-		this.enabled = options.enabled &&
-						(this.element.data('slider-enabled') === undefined || this.element.data('slider-enabled') === true);
-		if(this.enabled) {
+		if(this.options.enabled) {
 			this.enable();
 		} else {
 			this.disable();
 		}
-		this.natural_arrow_keys = this.element.data('slider-natural_arrow_keys') || options.natural_arrow_keys;
 	}
 
+	/*************************************************
+					
+				INSTANCE PROPERTIES/METHODS
+
+	**************************************************/
 	Slider.prototype = {
 		constructor: Slider,
 
@@ -327,7 +316,7 @@
 		}
 
 		showTooltip: function(){
-            if (this.tooltip_split === false ){
+            if (this.options.tooltip_split === false ){
                 this.tooltip.addClass('in');
             } else {
                 this.tooltip_min.addClass('in');
@@ -379,7 +368,7 @@
 
 			if (this.range) {
 				this.tooltipInner.text(
-					this.formater(this.options.value[0]) + this.tooltip_separator + this.formater(this.options.value[1])
+					this.options.formatter(this.options.value[0]) + this.options.formatter(this.options.value[1])
 				);
 				this.tooltip[0].style[this.stylePos] = (positionPercentages[1] + positionPercentages[0])/2 + '%';
 				if (this.orientation === 'vertical') {
@@ -394,10 +383,10 @@
 					this.tooltip.css('margin-left', -this.tooltip.outerWidth() / 2 + 'px');
 				}
 				this.tooltipInner_min.text(
-					this.formater(this.options.value[0])
+					this.options.formatter(this.options.value[0])
 				);
 				this.tooltipInner_max.text(
-					this.formater(this.options.value[1])
+					this.options.formatter(this.options.value[1])
 				);
 
 				this.tooltip_min[0].style[this.stylePos] = positionPercentages[0] + '%';
@@ -414,7 +403,7 @@
 				}
 			} else {
 				this.tooltipInner.text(
-					this.formater(this.options.value[0])
+					this.options.formatter(this.options.value[0])
 				);
 				this.tooltip[0].style[this.stylePos] = positionPercentages[0] + '%';
 				if (this.orientation === 'vertical') {
@@ -426,7 +415,7 @@
 		},
 
 		mousedown: function(ev) {
-			if(!this.isEnabled()) {
+			if(!this.options.enabled) {
 				return false;
 			}
 			// Touch: Get the original event:
@@ -487,7 +476,7 @@
 		},
 
 		keydown: function(handleIdx, ev) {
-			if(!this.isEnabled()) {
+			if(!this.options.enabled) {
 				return false;
 			}
 
@@ -507,7 +496,7 @@
 			}
 
 			// use natural arrow keys instead of from min to max
-			if (this.natural_arrow_keys) {
+			if (this.options.natural_arrow_keys) {
 				if ((this.orientation === 'vertical' && !this.reversed) || (this.orientation === 'horizontal' && this.reversed)) {
 					dir = dir * -1;
 				}
@@ -549,7 +538,7 @@
 		},
 
 		mousemove: function(ev) {
-			if(!this.isEnabled()) {
+			if(!this.options.enabled) {
 				return false;
 			}
 			// Touch: Get the original event:
@@ -580,7 +569,7 @@
 		},
 
 		mouseup: function() {
-			if(!this.isEnabled()) {
+			if(!this.options.enabled) {
 				return false;
 			}
 			if (this.touchCapable) {
@@ -743,7 +732,7 @@
 		},
 
 		disable: function() {
-			this.enabled = false;
+			this.options.enabled = false;
 			this.handle1.removeAttr("tabindex");
 			this.handle2.removeAttr("tabindex");
 			this.sliderElem.addClass('slider-disabled');
@@ -751,7 +740,7 @@
 		},
 
 		enable: function() {
-			this.enabled = true;
+			this.options.enabled = true;
 			this.handle1.attr("tabindex", 0);
 			this.handle2.attr("tabindex", 0);
 			this.sliderElem.removeClass('slider-disabled');
@@ -759,15 +748,11 @@
 		},
 
 		toggle: function() {
-			if(this.enabled) {
+			if(this.options.enabled) {
 				this.disable();
 			} else {
 				this.enable();
 			}
-		},
-
-		isEnabled: function() {
-			return this.enabled;
 		},
 
 		setAttribute: function(attribute, value) {
@@ -776,6 +761,10 @@
 
 		getAttribute: function(attribute) {
 			return this[attribute];
+		},
+
+		isEnabled: function() {
+			return this.options.enabled;
 		}
 
 	};
@@ -912,7 +901,6 @@
 	// 	range: false,
 	// 	selection: 'before',
 	// 	tooltip: 'show',
-	// 	tooltip_separator: ':',
 	// 	tooltip_split: false,
 	// 	natural_arrow_keys: false,
 	// 	handle: 'round',
