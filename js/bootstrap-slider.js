@@ -104,6 +104,67 @@
 
 		**************************************************/
 
+		var optionTypes = Object.keys(this.options);
+		for(var i = 0; i < optionTypes.length; i++) {
+			var optName = optionTypes[i];
+
+			// First check the data atrributes
+			var val = getDataAttrib(this.element, optName);
+			// If no data attrib, then check if an option was passed in via the constructor
+			val = val ? val : options[optName];
+			// Finally, if nothing was specified, use the defaults
+			val = val ? val : this.options[optName];
+
+			this.options[optName] = val;
+		}
+
+		function getDataAttrib(element, optName) {
+			var dataValString;
+
+			if(element.dataset) {
+				dataValString = element.dataset[optName];
+			} else {
+				var dataName = "data-slider-" + optName;
+				dataValString = msglist.getAttribute(dataName);
+			}
+
+			return JSON.parse(dataValString);
+		}
+
+
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 		this.id = this.element.data('slider-id')||options.id;
 		if (this.id) {
 			this.sliderElem[0].id = this.id;
@@ -823,28 +884,28 @@
 		return $this;
 	}
 
-	$.fn.slider.defaults = {
-		min: 0,
-		max: 10,
-		step: 1,
-		precision: 0,
-		orientation: 'horizontal',
-		value: 5,
-		range: false,
-		selection: 'before',
-		tooltip: 'show',
-		tooltip_separator: ':',
-		tooltip_split: false,
-		natural_arrow_keys: false,
-		handle: 'round',
-		reversed : false,
-		enabled: true,
-		formater: function(value) {
-			return value;
-		}
-	};
+	// $.fn.slider.defaults = {
+	// 	min: 0,
+	// 	max: 10,
+	// 	step: 1,
+	// 	precision: 0,
+	// 	orientation: 'horizontal',
+	// 	value: 5,
+	// 	range: false,
+	// 	selection: 'before',
+	// 	tooltip: 'show',
+	// 	tooltip_separator: ':',
+	// 	tooltip_split: false,
+	// 	natural_arrow_keys: false,
+	// 	handle: 'round',
+	// 	reversed : false,
+	// 	enabled: true,
+	// 	formater: function(value) {
+	// 		return value;
+	// 	}
+	// };
 
-	$.fn.slider.Constructor = Slider;
+	// $.fn.slider.Constructor = Slider;
 
 })( window.jQuery );
 
