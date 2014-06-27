@@ -25,7 +25,11 @@
 	};
 
 	function Slider(element, options) {
-		/* Select target <input> elements */
+		/*************************************************
+					
+						Create Slider Markup
+
+		**************************************************/
 		this.element = document.querySelectorAll(element);
 		var origWidth = this.element.style.width;
 		var updateSlider = false;
@@ -35,11 +39,11 @@
 
 		if (sliderAlreadyExists) {
 			updateSlider = true;
-			this.picker = parent;
+			this.sliderElem = parent;
 		} else {
 			/* Create elements needed for slider */
-			this.picker = document.createElement("div");
-			this.picker.className = "slider";
+			this.sliderElem = document.createElement("div");
+			this.sliderElem.className = "slider";
 
 			/* Create slider track elements */
 			var sliderTrack = document.createElement("div");
@@ -72,13 +76,15 @@
 			createAndAppendTooltipSubElements(sliderTooltip);
 
 
-			/* Append components to picker */
-			this.picker.appendChild(sliderTrack);
-			this.picker.appendChild(sliderTooltip);
-			this.picker.appendChild(sliderTooltipMin);
-			this.picker.appendChild(sliderTooltipMax);
+			/* Append components to sliderElem */
+			this.sliderElem.appendChild(sliderTrack);
+			this.sliderElem.appendChild(sliderTooltip);
+			this.sliderElem.appendChild(sliderTooltipMin);
+			this.sliderElem.appendChild(sliderTooltipMax);
 
-			parent.appendChild();
+			/* Append slider element to parent container and hide this.element */
+			parent.appendChild(this.sliderElem);
+			this.sliderElem.style.display = "none";
 
 			function createAndAppendTooltipSubElements(tooltipElem) {
 				var arrow = document.createElement("div");
@@ -92,9 +98,15 @@
 			}
 		}
 
+		/*************************************************
+					
+						Process Options
+
+		**************************************************/
+
 		this.id = this.element.data('slider-id')||options.id;
 		if (this.id) {
-			this.picker[0].id = this.id;
+			this.sliderElem[0].id = this.id;
 		}
 
 		if (('ontouchstart' in window) || window.DocumentTouch && document instanceof window.DocumentTouch) {
@@ -103,19 +115,19 @@
 
 		var tooltip = this.element.data('slider-tooltip')||options.tooltip;
 
-		this.tooltip = this.picker.find('#tooltip');
+		this.tooltip = this.sliderElem.find('#tooltip');
 		this.tooltipInner = this.tooltip.find('div.tooltip-inner');
 
-		this.tooltip_min = this.picker.find('#tooltip_min');
+		this.tooltip_min = this.sliderElem.find('#tooltip_min');
 		this.tooltipInner_min = this.tooltip_min.find('div.tooltip-inner');
 
-		this.tooltip_max = this.picker.find('#tooltip_max');
+		this.tooltip_max = this.sliderElem.find('#tooltip_max');
 		this.tooltipInner_max= this.tooltip_max.find('div.tooltip-inner');
 
 		if (updateSlider === true) {
 			// Reset classes
-			this.picker.removeClass('slider-horizontal');
-			this.picker.removeClass('slider-vertical');
+			this.sliderElem.removeClass('slider-horizontal');
+			this.sliderElem.removeClass('slider-vertical');
 			this.tooltip.removeClass('hide');
 			this.tooltip_min.removeClass('hide');
 			this.tooltip_max.removeClass('hide');
@@ -125,7 +137,7 @@
 		this.orientation = this.element.data('slider-orientation')||options.orientation;
 		switch(this.orientation) {
 			case 'vertical':
-				this.picker.addClass('slider-vertical');
+				this.sliderElem.addClass('slider-vertical');
 				this.stylePos = 'top';
 				this.mousePos = 'pageY';
 				this.sizePos = 'offsetHeight';
@@ -134,7 +146,7 @@
 				this.tooltip_max.addClass('right')[0].style.left = '100%';
 				break;
 			default:
-				this.picker
+				this.sliderElem
 					.addClass('slider-horizontal')
 					.css('width', origWidth);
 				this.orientation = 'horizontal';
@@ -179,17 +191,17 @@
 		}
 
 		this.selection = this.element.data('slider-selection')||options.selection;
-		this.selectionEl = this.picker.find('.slider-selection');
+		this.selectionEl = this.sliderElem.find('.slider-selection');
 		if (this.selection === 'none') {
 			this.selectionEl.addClass('hide');
 		}
 
 		this.selectionElStyle = this.selectionEl[0].style;
 
-		this.handle1 = this.picker.find('.slider-handle:first');
+		this.handle1 = this.sliderElem.find('.slider-handle:first');
 		this.handle1Stype = this.handle1[0].style;
 
-		this.handle2 = this.picker.find('.slider-handle:last');
+		this.handle2 = this.sliderElem.find('.slider-handle:last');
 		this.handle2Stype = this.handle2[0].style;
 
 		if (updateSlider === true) {
@@ -204,8 +216,8 @@
 			this.handle2.addClass(this.handle);
 		}
 
-		this.offset = this.picker.offset();
-		this.size = this.picker[0][this.sizePos];
+		this.offset = this.sliderElem.offset();
+		this.size = this.sliderElem[0][this.sizePos];
 		this.formater = options.formater;
 		
 		this.tooltip_separator = options.tooltip_separator;
@@ -222,12 +234,12 @@
 
 		if (this.touchCapable) {
 			// Touch: Bind touch events:
-			this.picker.on({
+			this.sliderElem.on({
 				touchstart: $.proxy(this.mousedown, this)
 			});
 		}
 		// Bind mouse events:
-		this.picker.on({
+		this.sliderElem.on({
 			mousedown: $.proxy(this.mousedown, this)
 		});
 
@@ -239,7 +251,7 @@
 			this.showTooltip();
 			this.alwaysShowTooltip = true;
 		} else {
-			this.picker.on({
+			this.sliderElem.on({
 				mouseenter: $.proxy(this.showTooltip, this),
 				mouseleave: $.proxy(this.hideTooltip, this)
 			});
@@ -400,8 +412,8 @@
 
 			this.triggerFocusOnHandle();
 
-			this.offset = this.picker.offset();
-			this.size = this.picker[0][this.sizePos];
+			this.offset = this.sliderElem.offset();
+			this.size = this.sliderElem[0][this.sizePos];
 
 			var percentage = this.getPercentage(ev);
 
@@ -701,8 +713,8 @@
 		destroy: function(){
 			this.handle1.off();
 			this.handle2.off();
-			this.element.off().show().insertBefore(this.picker);
-			this.picker.off().remove();
+			this.element.off().show().insertBefore(this.sliderElem);
+			this.sliderElem.off().remove();
 			$(this.element).removeData('slider');
 		},
 
@@ -710,7 +722,7 @@
 			this.enabled = false;
 			this.handle1.removeAttr("tabindex");
 			this.handle2.removeAttr("tabindex");
-			this.picker.addClass('slider-disabled');
+			this.sliderElem.addClass('slider-disabled');
 			this.element.trigger('slideDisabled');
 		},
 
@@ -718,7 +730,7 @@
 			this.enabled = true;
 			this.handle1.attr("tabindex", 0);
 			this.handle2.attr("tabindex", 0);
-			this.picker.removeClass('slider-disabled');
+			this.sliderElem.removeClass('slider-disabled');
 			this.element.trigger('slideEnabled');
 		},
 
