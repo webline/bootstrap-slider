@@ -27,7 +27,7 @@
 	function Slider(element, options) {
 		/*************************************************
 					
-						Create Slider Markup
+						Create Markup
 
 		**************************************************/
 		this.element = document.querySelectorAll(element);
@@ -132,67 +132,31 @@
 		}
 
 
-		
+		/*************************************************
+					
+							Setup
 
+		**************************************************/
+		this.sliderElem.id = this.options.id;
 
+		this.touchCapable = 'ontouchstart' in window || window.DocumentTouch && document instanceof window.DocumentTouch;
 
+		this.tooltip = this.sliderElem.querySelector('.tooltip');
+		this.tooltipInner = this.tooltip.querySelector('.tooltip-inner');
 
+		this.tooltip_min = this.sliderElem.find('.tooltip-min');
+		this.tooltipInner_min = this.tooltip_min.find('.tooltip-inner');
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-		this.id = this.element.data('slider-id')||options.id;
-		if (this.id) {
-			this.sliderElem[0].id = this.id;
-		}
-
-		if (('ontouchstart' in window) || window.DocumentTouch && document instanceof window.DocumentTouch) {
-			this.touchCapable = true;
-		}
-
-		var tooltip = this.element.data('slider-tooltip')||options.tooltip;
-
-		this.tooltip = this.sliderElem.find('#tooltip');
-		this.tooltipInner = this.tooltip.find('div.tooltip-inner');
-
-		this.tooltip_min = this.sliderElem.find('#tooltip_min');
-		this.tooltipInner_min = this.tooltip_min.find('div.tooltip-inner');
-
-		this.tooltip_max = this.sliderElem.find('#tooltip_max');
-		this.tooltipInner_max= this.tooltip_max.find('div.tooltip-inner');
+		this.tooltip_max = this.sliderElem.find('. tooltip-max');
+		this.tooltipInner_max= this.tooltip_max.find('.tooltip-inner');
 
 		if (updateSlider === true) {
 			// Reset classes
-			this.sliderElem.removeClass('slider-horizontal');
-			this.sliderElem.removeClass('slider-vertical');
-			this.tooltip.removeClass('hide');
-			this.tooltip_min.removeClass('hide');
-			this.tooltip_max.removeClass('hide');
-
+			removeClass(this.sliderElem, 'slider-horizontal');
+			removeClass(this.sliderElem, 'slider-vertical');
+			removeClass(this.tooltip, 'hide');
+			removeClass(this.tooltip_min, 'hide');
+			removeClass(this.tooltip_max, 'hide');
 		}
 
 		this.orientation = this.element.data('slider-orientation')||options.orientation;
@@ -816,6 +780,27 @@
 		}
 
 	};
+
+
+	/******************************+
+				
+				Helpers
+
+	********************************/
+	function removeClass(element, classString) {
+		var classes = classString.split(" ");
+		var newClasses = element.className;
+
+		for(var i = 0; i < classes.length; i++) {
+			var classTag = classes[i];
+			var regex = new RegExp("(?:\\s|^)" + classTag + "(?:\\s|$)");
+			newClasses = newClasses.replace(regex, " ");
+		}
+
+		element.className = newClasses.trim();
+	}
+
+
 
 	var publicMethods = {
 		getValue : Slider.prototype.getValue,
