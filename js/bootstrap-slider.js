@@ -24,30 +24,61 @@
 		callingContextNotSliderInstance : "Calling context element does not have instance of Slider bound to it. Check your code to make sure the JQuery object returned from the call to the slider() initializer is calling the method"
 	};
 
-	var Slider = function(element, options) {
-		var el = this.element = $(element).hide();
-		var origWidth =  $(element)[0].style.width;
-
+	function Slider(element, options) {
+		/* Select target <input> elements */
+		this.element = document.querySelectorAll(element);
+		var origWidth = this.element.style.width;
 		var updateSlider = false;
-		var parent = this.element.parent();
 
+		var parent = this.element.parentNode;
+		var sliderAlreadyExists = parent.className.search("(?:\\s|^)slider(?:\\s|$)");
 
-		if (parent.hasClass('slider') === true) {
+		if (sliderAlreadyExists) {
 			updateSlider = true;
 			this.picker = parent;
 		} else {
-			this.picker = $('<div class="slider">'+
-								'<div class="slider-track">'+
-									'<div class="slider-selection"></div>'+
-									'<div class="slider-handle min-slider-handle"></div>'+
-									'<div class="slider-handle max-slider-handle"></div>'+
-								'</div>'+
-								'<div id="tooltip" class="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'+
-								'<div id="tooltip_min" class="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'+
-								'<div id="tooltip_max" class="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'+
-							'</div>')
-								.insertBefore(this.element)
-								.append(this.element);
+			/* Create elements needed for slider */
+			this.picker = document.createElement("div");
+			this.picker.className = "slider";
+
+			/* Create slider track elements */
+			var sliderTrack = document.createElement("div");
+			sliderTrack.className = "slider-track";
+
+			var sliderTrackSelection = document.createElement("div");
+			sliderTrackSelection.className = "slider-selection";
+
+			var sliderMinHandle = document.createElement("div");
+			sliderMinHandle.className = "slider-handle min-slider-handle";
+
+			var sliderMaxHandle = document.createElement("div");
+			sliderMaxHandle.className = "slider-handle max-slider-handle";
+
+			sliderTrack.appendChild(sliderTrackSelection);
+			sliderTrack.appendChild(sliderMinHandle);
+			sliderTrack.appendChild(sliderMaxHandle);
+
+			/* Create tooltip elements */
+			var sliderTooltip = document.createElement("div");
+			sliderTooltip.className = "tooltip";
+			createAndAppendTooltipSubElements(sliderTooltip);
+
+			var sliderTooltipMin = document.createElement("div");
+			sliderTooltipMin.className = "tooltip tooltip-min";
+			createAndAppendTooltipSubElements(sliderTooltip);
+
+			var sliderTooltipMax = document.createElement("div");
+			sliderTooltipMax.className = "tooltip tooltip-max";
+			createAndAppendTooltipSubElements(sliderTooltip);
+
+
+			/* Append components to picker */
+			this.picker.appendChild(sliderTrack);
+			this.picker.appendChild(sliderTooltip);
+			this.picker.appendChild(sliderTooltipMin);
+			this.picker.appendChild(sliderTooltipMax);
+
+			parent.appendChild(this.picker);
 		}
 
 		this.id = this.element.data('slider-id')||options.id;
@@ -219,13 +250,34 @@
 			this.disable();
 		}
 		this.natural_arrow_keys = this.element.data('slider-natural_arrow_keys') || options.natural_arrow_keys;
-	};
+	}
 
 	Slider.prototype = {
 		constructor: Slider,
 
 		over: false,
 		inDrag: false,
+
+		options: {
+			id: "",
+		  	min: 0,
+			max: 10,
+			step: 1,
+			precision: 0,
+			orientation: 'horizontal',
+			value: 5,
+			range: false,
+			selection: 'before',
+			tooltip: 'show',
+			tooltip_split: false,
+			handle: 'round',
+			reversed: false,
+			enabled: true,
+			formatter: function(val) {
+				return val;
+			},
+			natural_arrow_keys: false
+		}
 
 		showTooltip: function(){
             if (this.tooltip_split === false ){

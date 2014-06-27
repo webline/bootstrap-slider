@@ -18,7 +18,7 @@
 // plugin constructor
 // accepts two argments, element and options object
 function Slider( element, options ) {
-	/* Select target elements */
+	/* Select target <input> elements */
 	this.element = document.querySelectorAll(element);
 	
 	/* 
