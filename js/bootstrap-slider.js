@@ -78,7 +78,18 @@
 			this.picker.appendChild(sliderTooltipMin);
 			this.picker.appendChild(sliderTooltipMax);
 
-			parent.appendChild(this.picker);
+			parent.appendChild();
+
+			function createAndAppendTooltipSubElements(tooltipElem) {
+				var arrow = document.createElement("div");
+				arrow.className = "tooltip-arrow";
+
+				var inner = document.createElement("div");
+				inner.className = "tooltip-inner";
+
+				tooltipElem.appendChild(arrow);
+				tooltipElem.appendChild(inner);
+			}
 		}
 
 		this.id = this.element.data('slider-id')||options.id;
