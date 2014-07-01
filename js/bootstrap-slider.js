@@ -144,6 +144,7 @@
 							Setup
 
 		**************************************************/
+		this.eventToCallbackMap = {};
 		this.sliderElem.id = this.options.id;
 
 		this.touchCapable = 'ontouchstart' in window || window.DocumentTouch && document instanceof window.DocumentTouch;
@@ -289,11 +290,6 @@
 
 	**************************************************/
 	Slider.prototype = {
-		constructor: Slider,
-
-		over: false,
-		inDrag: false,
-
 		options: {
 			id: "",
 		  	min: 0,
@@ -313,24 +309,27 @@
 				return val;
 			},
 			natural_arrow_keys: false
-		}
-
+		},
+		
+		over: false,
+		
+		inDrag: false,
+		
 		showTooltip: function(){
             if (this.options.tooltip_split === false ){
-                this.tooltip.addClass('in');
+                addClass(this.tooltip, 'in');
             } else {
-                this.tooltip_min.addClass('in');
-                this.tooltip_max.addClass('in');
+                addClass(this.tooltip_min, 'in');
+                addClass(this.tooltip_max, 'in');
             }
-
 			this.over = true;
 		},
 
 		hideTooltip: function(){
 			if (this.inDrag === false && this.alwaysShowTooltip !== true) {
-				this.tooltip.removeClass('in');
-				this.tooltip_min.removeClass('in');
-				this.tooltip_max.removeClass('in');
+				removeClass(this.tooltip, 'in');
+				removeClass(this.tooltip_min, 'in');
+				removeClass(this.tooltip_max, 'in');
 			}
 			this.over = false;
 		},
@@ -358,21 +357,29 @@
                 var offset_max = this.tooltip_max[0].getBoundingClientRect();
 
                 if (offset_min.right > offset_max.left) {
-                    this.tooltip_max.removeClass('top');
-                    this.tooltip_max.addClass('bottom')[0].style.top = 18 + 'px';
+                    removeClass(this.tooltip_max, 'top');
+                    addClass(this.tooltip_max, 'bottom');
+                    this.tooltip_max.style.top = 18 + 'px';
                 } else {
-                    this.tooltip_max.removeClass('bottom');
-                    this.tooltip_max.addClass('top')[0].style.top = -30 + 'px';
+                    removeClass(this.tooltip_max, 'bottom');
+                    addClass(this.tooltip_max, 'top');
+                    this.tooltip_max.style.top = -30 + 'px';
                 }
 			}
 
 			if (this.range) {
-				this.tooltipInner.text(
-					this.options.formatter(this.options.value[0]) + this.options.formatter(this.options.value[1])
-				);
-				this.tooltip[0].style[this.stylePos] = (positionPercentages[1] + positionPercentages[0])/2 + '%';
+				setText(this.tooltipInner, this.options.formatter(this.options.value[0]) + this.options.formatter(this.options.value[1]));
+				this.tooltip.style[this.stylePos] = (positionPercentages[1] + positionPercentages[0])/2 + '%';
+				
+
+
+				/*
+						TODO: Revisit .css() method refactoring
+				*/
+
 				if (this.orientation === 'vertical') {
-					this.tooltip.css('margin-top', -this.tooltip.outerHeight() / 2 + 'px');
+					this.tooltip.
+					css('margin-top', -this.tooltip.outerHeight() / 2 + 'px');
 				} else {
 					this.tooltip.css('margin-left', -this.tooltip.outerWidth() / 2 + 'px');
 				}
@@ -382,30 +389,30 @@
 				} else {
 					this.tooltip.css('margin-left', -this.tooltip.outerWidth() / 2 + 'px');
 				}
-				this.tooltipInner_min.text(
-					this.options.formatter(this.options.value[0])
-				);
-				this.tooltipInner_max.text(
-					this.options.formatter(this.options.value[1])
-				);
+				
+				var innerTooltipMinText = this.options.formatter(this.options.value[0]);
+				setText(this.tooltipInner_min, innerTooltipMinText);
 
-				this.tooltip_min[0].style[this.stylePos] = positionPercentages[0] + '%';
+				var innerTooltipMaxText = this.options.formatter(this.options.value[1]);
+				setText(this.tooltipInner_max, innerTooltipMaxText);
+
+				this.tooltip_min.style[this.stylePos] = positionPercentages[0] + '%';
 				if (this.orientation === 'vertical') {
 					this.tooltip_min.css('margin-top', -this.tooltip_min.outerHeight() / 2 + 'px');
 				} else {
 					this.tooltip_min.css('margin-left', -this.tooltip_min.outerWidth() / 2 + 'px');
 				}
-				this.tooltip_max[0].style[this.stylePos] = positionPercentages[1] + '%';
+				this.tooltip_max.style[this.stylePos] = positionPercentages[1] + '%';
 				if (this.orientation === 'vertical') {
 					this.tooltip_max.css('margin-top', -this.tooltip_max.outerHeight() / 2 + 'px');
 				} else {
 					this.tooltip_max.css('margin-left', -this.tooltip_max.outerWidth() / 2 + 'px');
 				}
 			} else {
-				this.tooltipInner.text(
-					this.options.formatter(this.options.value[0])
-				);
-				this.tooltip[0].style[this.stylePos] = positionPercentages[0] + '%';
+				var innerTooltipText = this.options.formatter(this.options.value[0]);
+				setText(this.tooltipInner_min, innerTooltipText);
+
+				this.tooltip.style[this.stylePos] = positionPercentages[0] + '%';
 				if (this.orientation === 'vertical') {
 					this.tooltip.css('margin-top', -this.tooltip.outerHeight() / 2 + 'px');
 				} else {
@@ -426,7 +433,7 @@
 			this.triggerFocusOnHandle();
 
 			this.offset = this.sliderElem.offset();
-			this.size = this.sliderElem[0][this.sizePos];
+			this.size = this.sliderElem[this.sizePos];
 
 			var percentage = this.getPercentage(ev);
 
@@ -443,26 +450,21 @@
 
 			if (this.touchCapable) {
 				// Touch: Bind touch events:
-				$(document).on({
-					touchmove: $.proxy(this.mousemove, this),
-					touchend: $.proxy(this.mouseup, this)
-				});
+				document.addEventListener("touchmove", this.mousemove.bind(this), false);
+				document.addEventListener("touchend", this.mouseup.bind(this), false);
+			} else {
+				// Bind mouse events:
+				document.addEventListener("mousemove", this.mousemove.bind(this), false);
+				document.addEventListener("mouseup", this.mouseup.bind(this), false);
 			}
-			// Bind mouse events:
-			$(document).on({
-				mousemove: $.proxy(this.mousemove, this),
-				mouseup: $.proxy(this.mouseup, this)
-			});
 
 			this.inDrag = true;
 			var val = this.calculateValue();
-			this.element.trigger({
-					type: 'slideStart',
-					value: val
-				})
-				.data('value', val)
-				.prop('value', val);
+
+			trigger.call(this, 'slideStart', val);
+			setDataVal.call(this, val);
 			this.setValue(val);
+
 			return true;
 		},
 
@@ -518,22 +520,13 @@
 
 			var val = this.calculateValue();
 			
-			this.element.trigger({
-					type: 'slideStart',
-					value: val
-				})
-				.data('value', val)
-				.prop('value', val);
-
+			trigger.call(this, 'slideStart', val);
+			setDataVal.call(this, val);
 			this.setValue(val, true);
 
-			this.element
-				.trigger({
-					type: 'slideStop',
-					value: val
-				})
-				.data('value', val)
-				.prop('value', val);
+			trigger.call(this, 'slideStop', val);
+			setDataVal.call(this, val);
+			
 			return false;
 		},
 
@@ -574,30 +567,24 @@
 			}
 			if (this.touchCapable) {
 				// Touch: Unbind touch event handlers:
-				$(document).off({
-					touchmove: this.mousemove,
-					touchend: this.mouseup
-				});
+				document.removeEventListener("touchmove", this.touchmove, false);
+				document.removeEventListener("touchend", this.touchend, false);
+			} else {
+				// Unbind mouse event handlers:
+				document.removeEventListener("mousemove", this.mousemove, false);
+				document.removeEventListener("mouseup", this.mouseup, false);
 			}
-			// Unbind mouse event handlers:
-			$(document).off({
-				mousemove: this.mousemove,
-				mouseup: this.mouseup
-			});
-
+			
 			this.inDrag = false;
 			if (this.over === false) {
 				this.hideTooltip();
 			}
 			var val = this.calculateValue();
+			
 			this.layout();
-			this.element
-				.data('value', val)
-				.prop('value', val)
-				.trigger({
-					type: 'slideStop',
-					value: val
-				});
+			setDataVal.call(this, val);
+			trigger.call(this, 'slideStop', val);
+			
 			return false;
 		},
 
@@ -702,13 +689,8 @@
 
 			if(triggerSlideEvent === true) {
 				var slideEventValue = this.range ? this.options.value : this.options.value[0];
-				this.element
-					.trigger({
-						'type': 'slide',
-						'value': slideEventValue
-					})
-					.data('value', slideEventValue)
-					.prop('value', slideEventValue);
+				trigger.call(this, 'slide', slideEventValue);
+				setDataVal.call(this, slideEventValue);
 			}
 		},
 
@@ -716,10 +698,17 @@
 			if(typeof val === 'number') {
 				return val;
 			} else if(val instanceof Array) {
-				$.each(val, function(i, input) { if (typeof input !== 'number') { throw new Error( ErrorMsgs.formatInvalidInputErrorMsg(input) ); }});
+				validateArray(val);
 				return val;
 			} else {
 				throw new Error( ErrorMsgs.formatInvalidInputErrorMsg(val) );
+			}
+
+			function validateArray(val) {
+				for(var i = 0; i < val.length; i++) {
+					var input =  val[i];
+					if (typeof input !== 'number') { throw new Error( ErrorMsgs.formatInvalidInputErrorMsg(input) ); }
+				}
 			}
 		},
 
@@ -733,18 +722,18 @@
 
 		disable: function() {
 			this.options.enabled = false;
-			this.handle1.removeAttr("tabindex");
-			this.handle2.removeAttr("tabindex");
-			this.sliderElem.addClass('slider-disabled');
-			this.element.trigger('slideDisabled');
+			this.handle1.removeAttribute("tabindex");
+			this.handle2.removeAttribute("tabindex");
+			addClass(this.sliderElem, 'slider-disabled');
+			trigger.call(this, 'slideDisabled');
 		},
 
 		enable: function() {
 			this.options.enabled = true;
-			this.handle1.attr("tabindex", 0);
-			this.handle2.attr("tabindex", 0);
-			this.sliderElem.removeClass('slider-disabled');
-			this.element.trigger('slideEnabled');
+			this.handle1.setAttribute("tabindex", 0);
+			this.handle2.setAttribute("tabindex", 0);
+			removeClass(this.sliderElem, 'slider-disabled');
+			trigger.call(this, 'slideEnabled');
 		},
 
 		toggle: function() {
@@ -755,25 +744,19 @@
 			}
 		},
 
-		setAttribute: function(attribute, value) {
-			this[attribute] = value;
-		},
-
-		getAttribute: function(attribute) {
-			return this[attribute];
-		},
-
 		isEnabled: function() {
 			return this.options.enabled;
+		},
+
+		on: function(evt, callback) {
+			var callbacksArray = this.eventToCallbackMap[evt];
+			if(callbacksArray) {
+				callbacksArray.push(callback);
+			} else {
+				this.eventToCallbackMap[evt] = [];
+			}
 		}
-
 	};
-
-
-
-
-
-
 
 
 	/******************************+
@@ -781,6 +764,26 @@
 				Helpers
 
 	********************************/
+	function setDataVal(val) {
+		var value = "value: '" + val + "'";
+		this.element.setAttribute('data', value);
+	}
+
+	function trigger(evt, val) {
+		var callbackFn = this.eventToCallbackMap[evt];
+		if(callbackFn) {
+			callbackFn(val);
+		}
+	}
+
+	function setText(element, text) {
+		 if(element.innerText) {
+		 	element.innerText = text;
+		 } else if(element.textContent) {
+		 	element.textContent = text;
+		 }
+	}
+
 	function removeClass(element, classString) {
 		var classes = classString.split(" ");
 		var newClasses = element.className;
@@ -811,29 +814,15 @@
 		element.className = newClasses.trim();
 	}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 	var publicMethods = {
 		getValue : Slider.prototype.getValue,
 		setValue : Slider.prototype.setValue,
-		setAttribute : Slider.prototype.setAttribute,
-		getAttribute : Slider.prototype.getAttribute,
 		destroy : Slider.prototype.destroy,
 		disable : Slider.prototype.disable,
 		enable : Slider.prototype.enable,
 		toggle : Slider.prototype.toggle,
-		isEnabled: Slider.prototype.isEnabled
+		isEnabled: Slider.prototype.isEnabled,
+		on: Slider.prototype.on
 	};
 
 	$.fn.slider = function (option) {
