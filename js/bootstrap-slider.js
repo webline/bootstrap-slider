@@ -314,327 +314,6 @@
 		over: false,
 		
 		inDrag: false,
-		
-		showTooltip: function(){
-            if (this.options.tooltip_split === false ){
-                addClass(this.tooltip, 'in');
-            } else {
-                addClass(this.tooltip_min, 'in');
-                addClass(this.tooltip_max, 'in');
-            }
-			this.over = true;
-		},
-
-		hideTooltip: function(){
-			if (this.inDrag === false && this.alwaysShowTooltip !== true) {
-				removeClass(this.tooltip, 'in');
-				removeClass(this.tooltip_min, 'in');
-				removeClass(this.tooltip_max, 'in');
-			}
-			this.over = false;
-		},
-
-		layout: function(){
-			var positionPercentages;
-
-			if(this.reversed) {
-				positionPercentages = [ 100 - this.percentage[0], this.percentage[1] ];
-			} else {
-				positionPercentages = [ this.percentage[0], this.percentage[1] ];
-			}
-
-			this.handle1Stype[this.stylePos] = positionPercentages[0]+'%';
-			this.handle2Stype[this.stylePos] = positionPercentages[1]+'%';
-
-			if (this.orientation === 'vertical') {
-				this.selectionElStyle.top = Math.min(positionPercentages[0], positionPercentages[1]) +'%';
-				this.selectionElStyle.height = Math.abs(positionPercentages[0] - positionPercentages[1]) +'%';
-			} else {
-				this.selectionElStyle.left = Math.min(positionPercentages[0], positionPercentages[1]) +'%';
-				this.selectionElStyle.width = Math.abs(positionPercentages[0] - positionPercentages[1]) +'%';
-
-                var offset_min = this.tooltip_min[0].getBoundingClientRect();
-                var offset_max = this.tooltip_max[0].getBoundingClientRect();
-
-                if (offset_min.right > offset_max.left) {
-                    removeClass(this.tooltip_max, 'top');
-                    addClass(this.tooltip_max, 'bottom');
-                    this.tooltip_max.style.top = 18 + 'px';
-                } else {
-                    removeClass(this.tooltip_max, 'bottom');
-                    addClass(this.tooltip_max, 'top');
-                    this.tooltip_max.style.top = -30 + 'px';
-                }
-			}
-
-			if (this.range) {
-				setText(this.tooltipInner, this.options.formatter(this.options.value[0]) + this.options.formatter(this.options.value[1]));
-				this.tooltip.style[this.stylePos] = (positionPercentages[1] + positionPercentages[0])/2 + '%';
-
-				if (this.orientation === 'vertical') {
-					css(this.tooltip, 'margin-top', -this.tooltip.outerHeight() / 2 + 'px');
-				} else {
-					css(this.tooltip, 'margin-left', -this.tooltip.outerWidth() / 2 + 'px');
-				}
-				
-				if (this.orientation === 'vertical') {
-					css(this.tooltip, 'margin-top', -this.tooltip.outerHeight() / 2 + 'px');
-				} else {
-					css(this.tooltip, 'margin-left', -this.tooltip.outerWidth() / 2 + 'px');
-				}
-				
-				var innerTooltipMinText = this.options.formatter(this.options.value[0]);
-				setText(this.tooltipInner_min, innerTooltipMinText);
-
-				var innerTooltipMaxText = this.options.formatter(this.options.value[1]);
-				setText(this.tooltipInner_max, innerTooltipMaxText);
-
-				this.tooltip_min.style[this.stylePos] = positionPercentages[0] + '%';
-				if (this.orientation === 'vertical') {
-					css(this.tooltip_min, 'margin-top', -this.tooltip_min.outerHeight() / 2 + 'px');
-				} else {
-					css(this.tooltip_min, 'margin-left', -this.tooltip_min.outerWidth() / 2 + 'px');
-				}
-				this.tooltip_max.style[this.stylePos] = positionPercentages[1] + '%';
-				if (this.orientation === 'vertical') {
-					css(this.tooltip_max, 'margin-top', -this.tooltip_max.outerHeight() / 2 + 'px');
-				} else {
-					css(this.tooltip_max, 'margin-left', -this.tooltip_max.outerWidth() / 2 + 'px');
-				}
-			} else {
-				var innerTooltipText = this.options.formatter(this.options.value[0]);
-				setText(this.tooltipInner_min, innerTooltipText);
-
-				this.tooltip.style[this.stylePos] = positionPercentages[0] + '%';
-				if (this.orientation === 'vertical') {
-					css(this.tooltip, 'margin-top', -this.tooltip.outerHeight() / 2 + 'px');
-				} else {
-					css(this.tooltip, 'margin-left', -this.tooltip.outerWidth() / 2 + 'px');
-				}
-			}
-		},
-
-		mousedown: function(ev) {
-			if(!this.options.enabled) {
-				return false;
-			}
-			// Touch: Get the original event:
-			if (this.touchCapable && ev.type === 'touchstart') {
-				ev = ev.originalEvent;
-			}
-
-			this.triggerFocusOnHandle();
-
-			this.offset = offset(this.sliderElem);
-			this.size = this.sliderElem[this.sizePos];
-
-			var percentage = this.getPercentage(ev);
-
-			if (this.range) {
-				var diff1 = Math.abs(this.percentage[0] - percentage);
-				var diff2 = Math.abs(this.percentage[1] - percentage);
-				this.dragged = (diff1 < diff2) ? 0 : 1;
-			} else {
-				this.dragged = 0;
-			}
-
-			this.percentage[this.dragged] = this.reversed ? 100 - percentage : percentage;
-			this.layout();
-
-			if (this.touchCapable) {
-				// Touch: Bind touch events:
-				document.addEventListener("touchmove", this.mousemove.bind(this), false);
-				document.addEventListener("touchend", this.mouseup.bind(this), false);
-			} else {
-				// Bind mouse events:
-				document.addEventListener("mousemove", this.mousemove.bind(this), false);
-				document.addEventListener("mouseup", this.mouseup.bind(this), false);
-			}
-
-			this.inDrag = true;
-			var val = this.calculateValue();
-
-			trigger.call(this, 'slideStart', val);
-			setDataVal.call(this, val);
-			this.setValue(val);
-
-			return true;
-		},
-
-		triggerFocusOnHandle: function(handleIdx) {
-			if(handleIdx === 0) {
-				this.handle1.focus();
-			}
-			if(handleIdx === 1) {
-				this.handle2.focus();
-			}
-		},
-
-		keydown: function(handleIdx, ev) {
-			if(!this.options.enabled) {
-				return false;
-			}
-
-			var dir;
-			switch (ev.which) {
-				case 37: // left
-				case 40: // down
-					dir = -1;
-					break;
-				case 39: // right
-				case 38: // up
-					dir = 1;
-					break;
-			}
-			if (!dir) {
-				return;
-			}
-
-			// use natural arrow keys instead of from min to max
-			if (this.options.natural_arrow_keys) {
-				if ((this.orientation === 'vertical' && !this.reversed) || (this.orientation === 'horizontal' && this.reversed)) {
-					dir = dir * -1;
-				}
-			}
-
-			var oneStepValuePercentageChange = dir * this.percentage[2];
-			var percentage = this.percentage[handleIdx] + oneStepValuePercentageChange;
-
-			if (percentage > 100) {
-				percentage = 100;
-			} else if (percentage < 0) {
-				percentage = 0;
-			}
-
-			this.dragged = handleIdx;
-			this.adjustPercentageForRangeSliders(percentage);
-			this.percentage[this.dragged] = percentage;
-			this.layout();
-
-			var val = this.calculateValue();
-			
-			trigger.call(this, 'slideStart', val);
-			setDataVal.call(this, val);
-			this.setValue(val, true);
-
-			trigger.call(this, 'slideStop', val);
-			setDataVal.call(this, val);
-			
-			return false;
-		},
-
-		mousemove: function(ev) {
-			if(!this.options.enabled) {
-				return false;
-			}
-			// Touch: Get the original event:
-			if (this.touchCapable && ev.type === 'touchmove') {
-				ev = ev.originalEvent;
-			}
-
-			var percentage = this.getPercentage(ev);
-			this.adjustPercentageForRangeSliders(percentage);
-			this.percentage[this.dragged] = this.reversed ? 100 - percentage : percentage;
-			this.layout();
-
-			var val = this.calculateValue();
-			this.setValue(val, true);
-
-			return false;
-		},
-		adjustPercentageForRangeSliders: function(percentage) {
-			if (this.range) {
-				if (this.dragged === 0 && this.percentage[1] < percentage) {
-					this.percentage[0] = this.percentage[1];
-					this.dragged = 1;
-				} else if (this.dragged === 1 && this.percentage[0] > percentage) {
-					this.percentage[1] = this.percentage[0];
-					this.dragged = 0;
-				}
-			}
-		},
-
-		mouseup: function() {
-			if(!this.options.enabled) {
-				return false;
-			}
-			if (this.touchCapable) {
-				// Touch: Unbind touch event handlers:
-				document.removeEventListener("touchmove", this.touchmove, false);
-				document.removeEventListener("touchend", this.touchend, false);
-			} else {
-				// Unbind mouse event handlers:
-				document.removeEventListener("mousemove", this.mousemove, false);
-				document.removeEventListener("mouseup", this.mouseup, false);
-			}
-			
-			this.inDrag = false;
-			if (this.over === false) {
-				this.hideTooltip();
-			}
-			var val = this.calculateValue();
-			
-			this.layout();
-			setDataVal.call(this, val);
-			trigger.call(this, 'slideStop', val);
-			
-			return false;
-		},
-
-		calculateValue: function() {
-			var val;
-			if (this.range) {
-				val = [this.min,this.max];
-                if (this.percentage[0] !== 0){
-                    val[0] = (Math.max(this.min, this.min + Math.round((this.diff * this.percentage[0]/100)/this.step)*this.step));
-                    val[0] = this.applyPrecision(val[0]);
-                }
-                if (this.percentage[1] !== 100){
-                    val[1] = (Math.min(this.max, this.min + Math.round((this.diff * this.percentage[1]/100)/this.step)*this.step));
-                    val[1] = this.applyPrecision(val[1]);
-                }
-				this.options.value = val;
-			} else {
-				val = (this.min + Math.round((this.diff * this.percentage[0]/100)/this.step)*this.step);
-				if (val < this.min) {
-					val = this.min;
-				}
-				else if (val > this.max) {
-					val = this.max;
-				}
-				val = parseFloat(val);
-				val = this.applyPrecision(val);
-				this.options.value = [val, this.options.value[1]];
-			}
-			return val;
-		},
-		applyPrecision: function(val) {
-			var precision = this.precision || this.getNumDigitsAfterDecimalPlace(this.step);
-			return this.applyToFixedAndParseFloat(val, precision);
-		},
-		/*
-			Credits to Mike Samuel for the following method!
-			Source: http://stackoverflow.com/questions/10454518/javascript-how-to-retrieve-the-number-of-decimals-of-a-string-number
-		*/
-		getNumDigitsAfterDecimalPlace: function(num) {
-			var match = (''+num).match(/(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/);
-			if (!match) { return 0; }
-			return Math.max(0, (match[1] ? match[1].length : 0) - (match[2] ? +match[2] : 0));
-		},
-
-		applyToFixedAndParseFloat: function(num, toFixedInput) {
-			var truncatedNum = num.toFixed(toFixedInput);
-			return parseFloat(truncatedNum);
-		},
-
-		getPercentage: function(ev) {
-			if (this.touchCapable && (ev.type === 'touchstart' || ev.type === 'touchmove')) {
-				ev = ev.touches[0];
-			}
-			var percentage = (ev[this.mousePos] - this.offset[this.stylePos])*100/this.size;
-			percentage = Math.round(percentage/this.percentage[2])*this.percentage[2];
-			return Math.max(0, Math.min(100, percentage));
-		},
 
 		getValue: function() {
 			if (this.range) {
@@ -679,29 +358,10 @@
 
 			this.layout();
 
-
 			if(triggerSlideEvent === true) {
 				var slideEventValue = this.range ? this.options.value : this.options.value[0];
 				trigger.call(this, 'slide', slideEventValue);
 				setDataVal.call(this, slideEventValue);
-			}
-		},
-
-		validateInputValue : function(val) {
-			if(typeof val === 'number') {
-				return val;
-			} else if(val instanceof Array) {
-				validateArray(val);
-				return val;
-			} else {
-				throw new Error( ErrorMsgs.formatInvalidInputErrorMsg(val) );
-			}
-
-			function validateArray(val) {
-				for(var i = 0; i < val.length; i++) {
-					var input =  val[i];
-					if (typeof input !== 'number') { throw new Error( ErrorMsgs.formatInvalidInputErrorMsg(input) ); }
-				}
 			}
 		},
 
@@ -754,9 +414,355 @@
 
 	/******************************+
 				
-				Helpers
+				HELPERS
+
+	- Any method that is not bound 
+	to the prototype is considered a 'Helper'
+
 
 	********************************/
+	function showTooltip() {
+        if (this.options.tooltip_split === false ){
+            addClass(this.tooltip, 'in');
+        } else {
+            addClass(this.tooltip_min, 'in');
+            addClass(this.tooltip_max, 'in');
+        }
+		this.over = true;
+	}
+
+	function hideTooltip() {
+		if (this.inDrag === false && this.alwaysShowTooltip !== true) {
+			removeClass(this.tooltip, 'in');
+			removeClass(this.tooltip_min, 'in');
+			removeClass(this.tooltip_max, 'in');
+		}
+		this.over = false;
+	}
+
+	function layout() {
+		var positionPercentages;
+
+		if(this.reversed) {
+			positionPercentages = [ 100 - this.percentage[0], this.percentage[1] ];
+		} else {
+			positionPercentages = [ this.percentage[0], this.percentage[1] ];
+		}
+
+		this.handle1Stype[this.stylePos] = positionPercentages[0]+'%';
+		this.handle2Stype[this.stylePos] = positionPercentages[1]+'%';
+
+		if (this.orientation === 'vertical') {
+			this.selectionElStyle.top = Math.min(positionPercentages[0], positionPercentages[1]) +'%';
+			this.selectionElStyle.height = Math.abs(positionPercentages[0] - positionPercentages[1]) +'%';
+		} else {
+			this.selectionElStyle.left = Math.min(positionPercentages[0], positionPercentages[1]) +'%';
+			this.selectionElStyle.width = Math.abs(positionPercentages[0] - positionPercentages[1]) +'%';
+
+	        var offset_min = this.tooltip_min[0].getBoundingClientRect();
+	        var offset_max = this.tooltip_max[0].getBoundingClientRect();
+
+	        if (offset_min.right > offset_max.left) {
+	            removeClass(this.tooltip_max, 'top');
+	            addClass(this.tooltip_max, 'bottom');
+	            this.tooltip_max.style.top = 18 + 'px';
+	        } else {
+	            removeClass(this.tooltip_max, 'bottom');
+	            addClass(this.tooltip_max, 'top');
+	            this.tooltip_max.style.top = -30 + 'px';
+	        }
+		}
+
+		if (this.range) {
+			setText(this.tooltipInner, this.options.formatter(this.options.value[0]) + this.options.formatter(this.options.value[1]));
+			this.tooltip.style[this.stylePos] = (positionPercentages[1] + positionPercentages[0])/2 + '%';
+
+			if (this.orientation === 'vertical') {
+				css(this.tooltip, 'margin-top', -this.tooltip.outerHeight() / 2 + 'px');
+			} else {
+				css(this.tooltip, 'margin-left', -this.tooltip.outerWidth() / 2 + 'px');
+			}
+			
+			if (this.orientation === 'vertical') {
+				css(this.tooltip, 'margin-top', -this.tooltip.outerHeight() / 2 + 'px');
+			} else {
+				css(this.tooltip, 'margin-left', -this.tooltip.outerWidth() / 2 + 'px');
+			}
+			
+			var innerTooltipMinText = this.options.formatter(this.options.value[0]);
+			setText(this.tooltipInner_min, innerTooltipMinText);
+
+			var innerTooltipMaxText = this.options.formatter(this.options.value[1]);
+			setText(this.tooltipInner_max, innerTooltipMaxText);
+
+			this.tooltip_min.style[this.stylePos] = positionPercentages[0] + '%';
+			if (this.orientation === 'vertical') {
+				css(this.tooltip_min, 'margin-top', -this.tooltip_min.outerHeight() / 2 + 'px');
+			} else {
+				css(this.tooltip_min, 'margin-left', -this.tooltip_min.outerWidth() / 2 + 'px');
+			}
+			this.tooltip_max.style[this.stylePos] = positionPercentages[1] + '%';
+			if (this.orientation === 'vertical') {
+				css(this.tooltip_max, 'margin-top', -this.tooltip_max.outerHeight() / 2 + 'px');
+			} else {
+				css(this.tooltip_max, 'margin-left', -this.tooltip_max.outerWidth() / 2 + 'px');
+			}
+		} else {
+			var innerTooltipText = this.options.formatter(this.options.value[0]);
+			setText(this.tooltipInner_min, innerTooltipText);
+
+			this.tooltip.style[this.stylePos] = positionPercentages[0] + '%';
+			if (this.orientation === 'vertical') {
+				css(this.tooltip, 'margin-top', -this.tooltip.outerHeight() / 2 + 'px');
+			} else {
+				css(this.tooltip, 'margin-left', -this.tooltip.outerWidth() / 2 + 'px');
+			}
+		}
+	}
+
+	function mousedown(ev) {
+		if(!this.options.enabled) {
+			return false;
+		}
+		// Touch: Get the original event:
+		if (this.touchCapable && ev.type === 'touchstart') {
+			ev = ev.originalEvent;
+		}
+
+		this.triggerFocusOnHandle();
+
+		this.offset = offset(this.sliderElem);
+		this.size = this.sliderElem[this.sizePos];
+
+		var percentage = this.getPercentage(ev);
+
+		if (this.range) {
+			var diff1 = Math.abs(this.percentage[0] - percentage);
+			var diff2 = Math.abs(this.percentage[1] - percentage);
+			this.dragged = (diff1 < diff2) ? 0 : 1;
+		} else {
+			this.dragged = 0;
+		}
+
+		this.percentage[this.dragged] = this.reversed ? 100 - percentage : percentage;
+		this.layout();
+
+		if (this.touchCapable) {
+			// Touch: Bind touch events:
+			document.addEventListener("touchmove", this.mousemove.bind(this), false);
+			document.addEventListener("touchend", this.mouseup.bind(this), false);
+		} else {
+			// Bind mouse events:
+			document.addEventListener("mousemove", this.mousemove.bind(this), false);
+			document.addEventListener("mouseup", this.mouseup.bind(this), false);
+		}
+
+		this.inDrag = true;
+		var val = this.calculateValue();
+
+		trigger.call(this, 'slideStart', val);
+		setDataVal.call(this, val);
+		this.setValue(val);
+
+		return true;
+	}
+
+	function triggerFocusOnHandle(handleIdx) {
+		if(handleIdx === 0) {
+			this.handle1.focus();
+		}
+		if(handleIdx === 1) {
+			this.handle2.focus();
+		}
+	}
+
+	function keydown(handleIdx, ev) {
+		if(!this.options.enabled) {
+			return false;
+		}
+
+		var dir;
+		switch (ev.which) {
+			case 37: // left
+			case 40: // down
+				dir = -1;
+				break;
+			case 39: // right
+			case 38: // up
+				dir = 1;
+				break;
+		}
+		if (!dir) {
+			return;
+		}
+
+		// use natural arrow keys instead of from min to max
+		if (this.options.natural_arrow_keys) {
+			if ((this.orientation === 'vertical' && !this.reversed) || (this.orientation === 'horizontal' && this.reversed)) {
+				dir = dir * -1;
+			}
+		}
+
+		var oneStepValuePercentageChange = dir * this.percentage[2];
+		var percentage = this.percentage[handleIdx] + oneStepValuePercentageChange;
+
+		if (percentage > 100) {
+			percentage = 100;
+		} else if (percentage < 0) {
+			percentage = 0;
+		}
+
+		this.dragged = handleIdx;
+		this.adjustPercentageForRangeSliders(percentage);
+		this.percentage[this.dragged] = percentage;
+		this.layout();
+
+		var val = this.calculateValue();
+		
+		trigger.call(this, 'slideStart', val);
+		setDataVal.call(this, val);
+		this.setValue(val, true);
+
+		trigger.call(this, 'slideStop', val);
+		setDataVal.call(this, val);
+		
+		return false;
+	}
+
+	function mousemove(ev) {
+		if(!this.options.enabled) {
+			return false;
+		}
+		// Touch: Get the original event:
+		if (this.touchCapable && ev.type === 'touchmove') {
+			ev = ev.originalEvent;
+		}
+
+		var percentage = this.getPercentage(ev);
+		this.adjustPercentageForRangeSliders(percentage);
+		this.percentage[this.dragged] = this.reversed ? 100 - percentage : percentage;
+		this.layout();
+
+		var val = this.calculateValue();
+		this.setValue(val, true);
+
+		return false;
+	}
+
+	function adjustPercentageForRangeSliders(percentage) {
+		if (this.range) {
+			if (this.dragged === 0 && this.percentage[1] < percentage) {
+				this.percentage[0] = this.percentage[1];
+				this.dragged = 1;
+			} else if (this.dragged === 1 && this.percentage[0] > percentage) {
+				this.percentage[1] = this.percentage[0];
+				this.dragged = 0;
+			}
+		}
+	}
+
+	function mouseup() {
+		if(!this.options.enabled) {
+			return false;
+		}
+		if (this.touchCapable) {
+			// Touch: Unbind touch event handlers:
+			document.removeEventListener("touchmove", this.touchmove, false);
+			document.removeEventListener("touchend", this.touchend, false);
+		} else {
+			// Unbind mouse event handlers:
+			document.removeEventListener("mousemove", this.mousemove, false);
+			document.removeEventListener("mouseup", this.mouseup, false);
+		}
+		
+		this.inDrag = false;
+		if (this.over === false) {
+			this.hideTooltip();
+		}
+		var val = this.calculateValue();
+		
+		this.layout();
+		setDataVal.call(this, val);
+		trigger.call(this, 'slideStop', val);
+		
+		return false;
+	}
+
+	function calculateValue() {
+		var val;
+		if (this.range) {
+			val = [this.min,this.max];
+	        if (this.percentage[0] !== 0){
+	            val[0] = (Math.max(this.min, this.min + Math.round((this.diff * this.percentage[0]/100)/this.step)*this.step));
+	            val[0] = this.applyPrecision(val[0]);
+	        }
+	        if (this.percentage[1] !== 100){
+	            val[1] = (Math.min(this.max, this.min + Math.round((this.diff * this.percentage[1]/100)/this.step)*this.step));
+	            val[1] = this.applyPrecision(val[1]);
+	        }
+			this.options.value = val;
+		} else {
+			val = (this.min + Math.round((this.diff * this.percentage[0]/100)/this.step)*this.step);
+			if (val < this.min) {
+				val = this.min;
+			}
+			else if (val > this.max) {
+				val = this.max;
+			}
+			val = parseFloat(val);
+			val = this.applyPrecision(val);
+			this.options.value = [val, this.options.value[1]];
+		}
+		return val;
+	}
+
+	function applyPrecision(val) {
+		var precision = this.precision || this.getNumDigitsAfterDecimalPlace(this.step);
+		return this.applyToFixedAndParseFloat(val, precision);
+	}
+
+	/*
+		Credits to Mike Samuel for the following method!
+		Source: http://stackoverflow.com/questions/10454518/javascript-how-to-retrieve-the-number-of-decimals-of-a-string-number
+	*/
+	function getNumDigitsAfterDecimalPlace(num) {
+		var match = (''+num).match(/(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/);
+		if (!match) { return 0; }
+		return Math.max(0, (match[1] ? match[1].length : 0) - (match[2] ? +match[2] : 0));
+	}
+
+	function applyToFixedAndParseFloat(num, toFixedInput) {
+		var truncatedNum = num.toFixed(toFixedInput);
+		return parseFloat(truncatedNum);
+	}
+
+	function getPercentage(ev) {
+		if (this.touchCapable && (ev.type === 'touchstart' || ev.type === 'touchmove')) {
+			ev = ev.touches[0];
+		}
+		var percentage = (ev[this.mousePos] - this.offset[this.stylePos])*100/this.size;
+		percentage = Math.round(percentage/this.percentage[2])*this.percentage[2];
+		return Math.max(0, Math.min(100, percentage));
+	}
+
+	function validateInputValue(val) {
+		if(typeof val === 'number') {
+			return val;
+		} else if(val instanceof Array) {
+			validateArray(val);
+			return val;
+		} else {
+			throw new Error( ErrorMsgs.formatInvalidInputErrorMsg(val) );
+		}
+	}
+
+	function validateArray(val) {
+		for(var i = 0; i < val.length; i++) {
+			var input =  val[i];
+			if (typeof input !== 'number') { throw new Error( ErrorMsgs.formatInvalidInputErrorMsg(input) ); }
+		}
+	}
+
 	function setDataVal(val) {
 		var value = "value: '" + val + "'";
 		this.element.setAttribute('data', value);
@@ -825,8 +831,9 @@
 		elementRef.style[styleName] = value;
 	}
 
-	/*** OLD CODE BELOW ***/
-
+	function removeHandleEventListeners(slideHandleRef) {
+		slideHandleRef.removeEventListener("focus");=
+	}
 
 	var publicMethods = {
 		getValue : Slider.prototype.getValue,
@@ -838,6 +845,9 @@
 		isEnabled: Slider.prototype.isEnabled,
 		on: Slider.prototype.on
 	};
+
+	/*** OLD CODE BELOW ***/
+
 
 	$.fn.slider = function (option) {
 		if (typeof option === 'string' && option !== 'refresh') {
