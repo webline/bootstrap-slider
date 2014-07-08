@@ -235,7 +235,7 @@
 			addClass(this.handle2, this.options.handle);
 		}
 
-		this.offset = this.sliderElem.offset(); // TODO: revisit
+		this.offset = offset(this.sliderElem);
 		this.size = this.sliderElem[this.sizePos];
 		
 		this.setValue(this.options.value);
@@ -378,8 +378,7 @@
 				*/
 
 				if (this.orientation === 'vertical') {
-					this.tooltip.
-					css('margin-top', -this.tooltip.outerHeight() / 2 + 'px');
+					this.tooltip.css('margin-top', -this.tooltip.outerHeight() / 2 + 'px');
 				} else {
 					this.tooltip.css('margin-left', -this.tooltip.outerWidth() / 2 + 'px');
 				}
@@ -432,7 +431,7 @@
 
 			this.triggerFocusOnHandle();
 
-			this.offset = this.sliderElem.offset();
+			this.offset = offset(this.sliderElem);
 			this.size = this.sliderElem[this.sizePos];
 
 			var percentage = this.getPercentage(ev);
@@ -878,6 +877,20 @@
 			$this.data('slider', (new Slider(this, $.extend({}, $.fn.slider.defaults, options))));
 		});
 		return $this;
+	}
+
+	function offset(obj) {
+	  var ol = ot = 0;
+	  if (obj.offsetParent) {
+	    do {
+	      ol += obj.offsetLeft;
+	      ot += obj.offsetTop;
+	    } while (obj = obj.offsetParent);
+	  }
+	  return {
+	    left: ol,
+	    top: ot
+	  };
 	}
 
 	// $.fn.slider.defaults = {
