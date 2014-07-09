@@ -703,9 +703,6 @@ if ( typeof define === 'function' && define.amd ) {
 			}
 		},
 		_mousedown: function(ev) {
-			console.log("WE DOWN");
-
-
 			if(!this.options.enabled) {
 				return false;
 			}
