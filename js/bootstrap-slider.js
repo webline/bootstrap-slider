@@ -184,12 +184,17 @@ if ( typeof define === 'function' && define.amd ) {
 						Create Markup
 
 		**************************************************/
-		this.element = document.querySelectorAll(element);
+		if(typeof element === "string") {
+			this.element = document.querySelectorAll(element);
+		} else if(element instanceof HTMLElement) {
+			this.element = element;
+		}
+		
 		var origWidth = this.element.style.width;
 		var updateSlider = false;
 
 		var parent = this.element.parentNode;
-		var sliderAlreadyExists = parent.className.search("(?:\\s|^)slider(?:\\s|$)");
+		var sliderAlreadyExists = parent.className.search("(?:\\s|^)slider(?:\\s|$)") !== -1;
 
 		if (sliderAlreadyExists) {
 			updateSlider = true;
@@ -223,11 +228,11 @@ if ( typeof define === 'function' && define.amd ) {
 
 			var sliderTooltipMin = document.createElement("div");
 			sliderTooltipMin.className = "tooltip tooltip-min";
-			createAndAppendTooltipSubElements(sliderTooltip);
+			createAndAppendTooltipSubElements(sliderTooltipMin);
 
 			var sliderTooltipMax = document.createElement("div");
 			sliderTooltipMax.className = "tooltip tooltip-max";
-			createAndAppendTooltipSubElements(sliderTooltip);
+			createAndAppendTooltipSubElements(sliderTooltipMax);
 
 
 			/* Append components to sliderElem */
@@ -257,8 +262,9 @@ if ( typeof define === 'function' && define.amd ) {
 						Process Options
 
 		**************************************************/
-
+		options = options ? options : {};
 		var optionTypes = Object.keys(this.options);
+
 		for(var i = 0; i < optionTypes.length; i++) {
 			var optName = optionTypes[i];
 
@@ -273,18 +279,16 @@ if ( typeof define === 'function' && define.amd ) {
 		}
 
 		function getDataAttrib(element, optName) {
-			var dataValString;
-
-			if(element.dataset) {
-				dataValString = element.dataset[optName];
-			} else {
-				var dataName = "data-slider-" + optName;
-				dataValString = msglist.getAttribute(dataName);
+			var dataName = "data-slider-" + optName;
+			var dataValString = element.getAttribute(dataName);
+			
+			try {
+				return JSON.parse(dataValString);
 			}
-
-			return JSON.parse(dataValString);
+			catch(err) {
+				return dataValString;
+			}
 		}
-
 
 		/*************************************************
 					
@@ -299,39 +303,39 @@ if ( typeof define === 'function' && define.amd ) {
 		this.tooltip = this.sliderElem.querySelector('.tooltip');
 		this.tooltipInner = this.tooltip.querySelector('.tooltip-inner');
 
-		this.tooltip_min = this.sliderElem.find('.tooltip-min');
-		this.tooltipInner_min = this.tooltip_min.find('.tooltip-inner');
+		this.tooltip_min = this.sliderElem.querySelector('.tooltip-min');
+		this.tooltipInner_min = this.tooltip_min.querySelector('.tooltip-inner');
 
-		this.tooltip_max = this.sliderElem.find('. tooltip-max');
-		this.tooltipInner_max= this.tooltip_max.find('.tooltip-inner');
+		this.tooltip_max = this.sliderElem.querySelector('.tooltip-max');
+		this.tooltipInner_max= this.tooltip_max.querySelector('.tooltip-inner');
 
 		if (updateSlider === true) {
 			// Reset classes
-			removeClass(this.sliderElem, 'slider-horizontal');
-			removeClass(this.sliderElem, 'slider-vertical');
-			removeClass(this.tooltip, 'hide');
-			removeClass(this.tooltip_min, 'hide');
-			removeClass(this.tooltip_max, 'hide');
+			this._removeClass(this.sliderElem, 'slider-horizontal');
+			this._removeClass(this.sliderElem, 'slider-vertical');
+			this._removeClass(this.tooltip, 'hide');
+			this._removeClass(this.tooltip_min, 'hide');
+			this._removeClass(this.tooltip_max, 'hide');
 		}
 
 		this.orientation = this.options.orientation;
 		if(this.orientation === 'vertical') {
-			_addClass(this.sliderElem,'slider-vertical');
+			this._addClass(this.sliderElem,'slider-vertical');
 			
 			this.stylePos = 'top';
 			this.mousePos = 'pageY';
 			this.sizePos = 'offsetHeight';
 
-			_addClass(this.tooltip, 'right');
+			this._addClass(this.tooltip, 'right');
 			this.tooltip.style.left = '100%';
 			
-			_addClass(this.tooltip_min, 'right');
+			this._addClass(this.tooltip_min, 'right');
 			this.tooltip_min.style.left = '100%';
 
-			_addClass(this.tooltip_max, 'right');
+			this._addClass(this.tooltip_max, 'right');
 			this.tooltip_max.style.left = '100%';
 		} else {
-			_addClass(this.sliderElem, 'slider-horizontal');
+			this._addClass(this.sliderElem, 'slider-horizontal');
 			this.sliderElem.style.width = origWidth;
 
 			this.orientation = 'horizontal';
@@ -339,13 +343,13 @@ if ( typeof define === 'function' && define.amd ) {
 			this.mousePos = 'pageX';
 			this.sizePos = 'offsetWidth';
 			
-			_addClass(this.tooltip, 'top');
+			this._addClass(this.tooltip, 'top');
 			this.tooltip.style.top = -this.tooltip.outerHeight - 14 + 'px';
 			
-			_addClass(this.tooltip_min, 'top');
+			this._addClass(this.tooltip_min, 'top');
 			this.tooltip_min.style.top = -this.tooltip_min.outerHeight - 14 + 'px';
 
-			_addClass(this.tooltip_max, 'top');
+			this._addClass(this.tooltip_max, 'top');
 			this.tooltip_max.style.top = -this.tooltip_max.outerHeight - 14 + 'px';
 		}
 
@@ -358,7 +362,7 @@ if ( typeof define === 'function' && define.amd ) {
 
 		this.selectionEl = sliderTrackSelection;
 		if (this.options.selection === 'none') {
-			_addClass(this.selectionEl, 'hide');
+			this._addClass(this.selectionEl, 'hide');
 		}
 
 		this.selectionElStyle = this.selectionEl.style;
@@ -371,18 +375,18 @@ if ( typeof define === 'function' && define.amd ) {
 
 		if (updateSlider === true) {
 			// Reset classes
-			removeClass(this.handle1, 'round triangle');
-			removeClass(this.handle2, 'round triangle hide');
+			this._removeClass(this.handle1, 'round triangle');
+			this._removeClass(this.handle2, 'round triangle hide');
 		}
 
 		var availableHandleModifiers = ['round', 'triangle', 'custom'];
 		var isValidHandleType = availableHandleModifiers.indexOf(this.options.handle) !== -1;
 		if (isValidHandleType) {
-			_addClass(this.handle1, this.options.handle);
-			_addClass(this.handle2, this.options.handle);
+			this._addClass(this.handle1, this.options.handle);
+			this._addClass(this.handle2, this.options.handle);
 		}
 
-		this.offset = _offset(this.sliderElem);
+		this.offset = this._offset(this.sliderElem);
 		this.size = this.sliderElem[this.sizePos];
 		
 		this.setValue(this.options.value);
@@ -394,33 +398,33 @@ if ( typeof define === 'function' && define.amd ) {
 		******************************************/
 
 		// Bind keyboard handlers
-		this.handle1Keydown = this.keydown.bind(this, 0);
+		this.handle1Keydown = this._keydown.bind(this, 0);
 		this.handle1.addEventListener("keydown", this.handle1Keydown, false);
 
-		this.handle2Keydown = this.keydown.bind(this, 0);
+		this.handle2Keydown = this._keydown.bind(this, 0);
 		this.handle2.addEventListener("keydown", this.handle2Keydown, false);
 
 		if (this.touchCapable) {
 			// Bind touch handlers
-			this.mousedown = mousedown.bind(this, 0);
+			this.mousedown = this._mousedown.bind(this, 0);
 			this.sliderElem.addEventListener("touchstart", this.mousedown, false);
 		} else {
 			// Bind mouse handlers
-			this.mousedown = mousedown.bind(this);
+			this.mousedown = this._mousedown.bind(this);
 			this.sliderElem.addEventListener("mousedown", this.mousedown, false);
 		}
 
 		// Bind tooltip-related handlers
 		if(this.options.tooltip === 'hide') {
-			_addClass(this.tooltip, 'hide');
-			_addClass(this.tooltip_min, 'hide');
-			_addClass(this.tooltip_max, 'hide');
-		} else if(tooltip === 'always') {
-			this.showTooltip();
-			this.alwaysShowTooltip = true;
+			this._addClass(this.tooltip, 'hide');
+			this._addClass(this.tooltip_min, 'hide');
+			this._addClass(this.tooltip_max, 'hide');
+		} else if(this.options.tooltip === 'always') {
+			this._showTooltip();
+			this._alwaysShowTooltip = true;
 		} else {
-			this.showTooltip = showTooltip.bind(this);
-			this.hideTooltip = hideTooltip.bind(this);
+			this.showTooltip = this._showTooltip.bind(this);
+			this.hideTooltip = this._hideTooltip.bind(this);
 
 			this.sliderElem.addEventListener("mouseenter", this.showTooltip, false);
 			this.sliderElem.addEventListener("mouseleave", this.hideTooltip, false);
@@ -495,9 +499,8 @@ if ( typeof define === 'function' && define.amd ) {
 				this.options.value[0] = Math.max(this.options.min, Math.min(this.options.max, this.options.value[0]));
 				this.options.value[1] = Math.max(this.options.min, Math.min(this.options.max, this.options.value[1]));
 			} else {
-				this.options.value = applyPrecision(this.options.value);
 				this.options.value = [ Math.max(this.min, Math.min(this.max, this.options.value))];
-				_addClass(this.handle2, 'hide');
+				this._addClass(this.handle2, 'hide');
 				if (this.selection === 'after') {
 					this.options.value[1] = this.options.max;
 				} else {
@@ -516,7 +519,7 @@ if ( typeof define === 'function' && define.amd ) {
 				this.percentage = [0, 0, 100];
 			}
 
-			this.layout();
+			this._layout();
 
 			if(triggerSlideEvent === true) {
 				var slideEventValue = this.options.range ? this.options.value : this.options.value[0];
@@ -526,12 +529,24 @@ if ( typeof define === 'function' && define.amd ) {
 		},
 
 		destroy: function(){
-			// TODO
-			this.handle1.off();
-			this.handle2.off();
-			this.element.off().show().insertBefore(this.sliderElem);
-			this.sliderElem.off().remove();
-			$(this.element).removeData('slider');
+			// Remove event listeners from handle1
+			this.handle1.removeEventListener("keydown", this.handle1Keydown, false);
+			this.handle1.removeEventListener("focus", this.showTooltip, false);
+			this.handle1.removeEventListener("blur", this.hideTooltip, false);
+
+			// Remove event listeners from handle2
+			this.handle2.removeEventListener("keydown", this.handle2Keydown, false);
+			this.handle2.removeEventListener("focus", this.handle2Keydown, false);
+			this.handle2.removeEventListener("blur", this.handle2Keydown, false);
+
+			// Remove event listeners from sliderElem
+			this.sliderElem.removeEventListener("mouseenter", this.showTooltip, false);
+			this.sliderElem.removeEventListener("mouseleave", this.hideTooltip, false);
+			this.sliderElem.removeEventListener("touchstart", this.mousedown, false);
+			this.sliderElem.removeEventListener("mousedown", this.mousedown, false);
+
+			// Remove the slider from the DOM
+			this.sliderElem.parentNode.removeChild(this.sliderElem);
 		},
 
 		disable: function() {
@@ -546,7 +561,7 @@ if ( typeof define === 'function' && define.amd ) {
 			this.options.enabled = true;
 			this.handle1.setAttribute("tabindex", 0);
 			this.handle2.setAttribute("tabindex", 0);
-			removeClass(this.sliderElem, 'slider-disabled');
+			this._removeClass(this.sliderElem, 'slider-disabled');
 			this._trigger('slideEnabled');
 		},
 
@@ -580,7 +595,7 @@ if ( typeof define === 'function' && define.amd ) {
 
 		  					_fnName : function() {...}
 
-		********************************/		
+		********************************/
 		_showTooltip: function() {
 			if (this.options.tooltip_split === false ){
             	this._addClass(this.tooltip, 'in');
@@ -617,8 +632,8 @@ if ( typeof define === 'function' && define.amd ) {
 				this.selectionElStyle.left = Math.min(positionPercentages[0], positionPercentages[1]) +'%';
 				this.selectionElStyle.width = Math.abs(positionPercentages[0] - positionPercentages[1]) +'%';
 
-		        var offset_min = this.tooltip_min[0].getBoundingClientRect();
-		        var offset_max = this.tooltip_max[0].getBoundingClientRect();
+		        var offset_min = this.tooltip_min.getBoundingClientRect();
+		        var offset_max = this.tooltip_max.getBoundingClientRect();
 
 		        if (offset_min.right > offset_max.left) {
 		            this._removeClass(this.tooltip_max, 'top');
@@ -629,22 +644,22 @@ if ( typeof define === 'function' && define.amd ) {
 		            this._addClass(this.tooltip_max, 'top');
 		            this.tooltip_max.style.top = -30 + 'px';
 		        }
-			}
+ 			}
 
 			if (this.range) {
 				this._setText(this.tooltipInner, this.options.formatter(this.options.value[0]) + this.options.formatter(this.options.value[1]));
 				this.tooltip.style[this.stylePos] = (positionPercentages[1] + positionPercentages[0])/2 + '%';
 
 				if (this.options.orientation === 'vertical') {
-					this._css(this.tooltip, 'margin-top', -this.tooltip.outerHeight() / 2 + 'px');
+					this._css(this.tooltip, 'margin-top', -this.tooltip.offsetHeight / 2 + 'px');
 				} else {
-					this._css(this.tooltip, 'margin-left', -this.tooltip.outerWidth() / 2 + 'px');
+					this._css(this.tooltip, 'margin-left', -this.tooltip.offsetWidth / 2 + 'px');
 				}
 				
 				if (this.options.orientation === 'vertical') {
-					this._css(this.tooltip, 'margin-top', -this.tooltip.outerHeight() / 2 + 'px');
+					this._css(this.tooltip, 'margin-top', -this.tooltip.offsetHeight / 2 + 'px');
 				} else {
-					this._css(this.tooltip, 'margin-left', -this.tooltip.outerWidth() / 2 + 'px');
+					this._css(this.tooltip, 'margin-left', -this.tooltip.offsetWidth / 2 + 'px');
 				}
 				
 				var innerTooltipMinText = this.options.formatter(this.options.value[0]);
@@ -654,16 +669,19 @@ if ( typeof define === 'function' && define.amd ) {
 				this._setText(this.tooltipInner_max, innerTooltipMaxText);
 
 				this.tooltip_min.style[this.stylePos] = positionPercentages[0] + '%';
+
 				if (this.options.orientation === 'vertical') {
-					this._css(this.tooltip_min, 'margin-top', -this.tooltip_min.outerHeight() / 2 + 'px');
+					this._css(this.tooltip_min, 'margin-top', -this.tooltip_min.offsetHeight / 2 + 'px');
 				} else {
-					this._css(this.tooltip_min, 'margin-left', -this.tooltip_min.outerWidth() / 2 + 'px');
+					this._css(this.tooltip_min, 'margin-left', -this.tooltip_min.offsetWidth / 2 + 'px');
 				}
+
 				this.tooltip_max.style[this.stylePos] = positionPercentages[1] + '%';
+
 				if (this.options.orientation === 'vertical') {
-					this._css(this.tooltip_max, 'margin-top', -this.tooltip_max.outerHeight() / 2 + 'px');
+					this._css(this.tooltip_max, 'margin-top', -this.tooltip_max.offsetHeight / 2 + 'px');
 				} else {
-					this._css(this.tooltip_max, 'margin-left', -this.tooltip_max.outerWidth() / 2 + 'px');
+					this._css(this.tooltip_max, 'margin-left', -this.tooltip_max.offsetWidth / 2 + 'px');
 				}
 			} else {
 				var innerTooltipText = this.options.formatter(this.options.value[0]);
@@ -671,9 +689,10 @@ if ( typeof define === 'function' && define.amd ) {
 
 				this.tooltip.style[this.stylePos] = positionPercentages[0] + '%';
 				if (this.options.orientation === 'vertical') {
-					this._css(this.tooltip, 'margin-top', -this.tooltip.outerHeight() / 2 + 'px');
+
+					this._css(this.tooltip, 'margin-top', -this.tooltip.offsetHeight / 2 + 'px');
 				} else {
-					this._css(this.tooltip, 'margin-left', -this.tooltip.outerWidth() / 2 + 'px');
+					this._css(this.tooltip, 'margin-left', -this.tooltip.offsetWidth / 2 + 'px');
 				}
 			}
 		},
@@ -960,7 +979,8 @@ if ( typeof define === 'function' && define.amd ) {
 			element.className = newClasses.trim();
 		},
 		_offset: function (obj) {
-			var ol = ot = 0;
+			var ol = 0;
+			var ot = 0;
 			if (obj.offsetParent) {
 				do {
 				  ol += obj.offsetLeft;
@@ -974,9 +994,6 @@ if ( typeof define === 'function' && define.amd ) {
 		},
 		_css: function(elementRef, styleName, value) {
 			elementRef.style[styleName] = value;
-		},
-		_removeHandleEventListeners: function(slideHandleRef) {
-			slideHandleRef.removeEventListener("focus");
 		}
 	};
 
@@ -986,8 +1003,9 @@ if ( typeof define === 'function' && define.amd ) {
 
 	*********************************/
 	if($) {
-		$.bridget( 'slider', Slider );
+		$.bridget('slider', Slider);
 	}
+	window.Slider = Slider;
 
 
 })( window.jQuery );
