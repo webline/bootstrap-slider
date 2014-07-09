@@ -15,6 +15,153 @@
  * limitations under the License.
  * ========================================================= */
 
+
+/**
+ * Bridget makes jQuery widgets
+ * v1.0.1
+ * MIT license
+ */
+
+( function( window ) {
+
+'use strict';
+
+// -------------------------- utils -------------------------- //
+
+var slice = Array.prototype.slice;
+
+function noop() {}
+
+// -------------------------- definition -------------------------- //
+
+function defineBridget( $ ) {
+
+// bail if no jQuery
+if ( !$ ) {
+  return;
+}
+
+// -------------------------- addOptionMethod -------------------------- //
+
+/**
+ * adds option method -> $().plugin('option', {...})
+ * @param {Function} PluginClass - constructor class
+ */
+function addOptionMethod( PluginClass ) {
+  // don't overwrite original option method
+  if ( PluginClass.prototype.option ) {
+    return;
+  }
+
+  // option setter
+  PluginClass.prototype.option = function( opts ) {
+    // bail out if not an object
+    if ( !$.isPlainObject( opts ) ){
+      return;
+    }
+    this.options = $.extend( true, this.options, opts );
+  };
+}
+
+
+// -------------------------- plugin bridge -------------------------- //
+
+// helper function for logging errors
+// $.error breaks jQuery chaining
+var logError = typeof console === 'undefined' ? noop :
+  function( message ) {
+    console.error( message );
+  };
+
+/**
+ * jQuery plugin bridge, access methods like $elem.plugin('method')
+ * @param {String} namespace - plugin name
+ * @param {Function} PluginClass - constructor class
+ */
+function bridge( namespace, PluginClass ) {
+  // add to jQuery fn namespace
+  $.fn[ namespace ] = function( options ) {
+    if ( typeof options === 'string' ) {
+      // call plugin method when first argument is a string
+      // get arguments for method
+      var args = slice.call( arguments, 1 );
+
+      for ( var i=0, len = this.length; i < len; i++ ) {
+        var elem = this[i];
+        var instance = $.data( elem, namespace );
+        if ( !instance ) {
+          logError( "cannot call methods on " + namespace + " prior to initialization; " +
+            "attempted to call '" + options + "'" );
+          continue;
+        }
+        if ( !$.isFunction( instance[options] ) || options.charAt(0) === '_' ) {
+          logError( "no such method '" + options + "' for " + namespace + " instance" );
+          continue;
+        }
+
+        // trigger method with arguments
+        var returnValue = instance[ options ].apply( instance, args );
+
+        // break look and return first value if provided
+        if ( returnValue !== undefined ) {
+          return returnValue;
+        }
+      }
+      // return this if no return value
+      return this;
+    } else {
+      return this.each( function() {
+        var instance = $.data( this, namespace );
+        if ( instance ) {
+          // apply options & init
+          instance.option( options );
+          instance._init();
+        } else {
+          // initialize new instance
+          instance = new PluginClass( this, options );
+          $.data( this, namespace, instance );
+        }
+      });
+    }
+  };
+
+}
+
+// -------------------------- bridget -------------------------- //
+
+/**
+ * converts a Prototypical class into a proper jQuery plugin
+ *   the class must have a ._init method
+ * @param {String} namespace - plugin name, used in $().pluginName
+ * @param {Function} PluginClass - constructor class
+ */
+$.bridget = function( namespace, PluginClass ) {
+  addOptionMethod( PluginClass );
+  bridge( namespace, PluginClass );
+};
+
+return $.bridget;
+
+}
+
+// transport
+if ( typeof define === 'function' && define.amd ) {
+  // AMD
+  define( [ 'jquery' ], defineBridget );
+} else {
+  // get jquery from browser global
+  defineBridget( window.jQuery );
+}
+
+})( window );
+
+
+/*************************************************
+				
+		BOOTSTRAP-SLIDER SOURCE CODE
+
+**************************************************/
+
 (function( $ ) {
 
 	var ErrorMsgs = {
@@ -379,6 +526,7 @@
 		},
 
 		destroy: function(){
+			// TODO
 			this.handle1.off();
 			this.handle2.off();
 			this.element.off().show().insertBefore(this.sliderElem);
@@ -832,107 +980,14 @@
 		}
 	};
 
+	/*********************************
 
-	/******************************+
-				
-				HELPERS
+		Attach to global namespace
 
-	- Any method that is not bound 
-	to the prototype is considered a 'Helper'
-
-
-	********************************/
-
-	var publicMethods = {
-		getValue : Slider.prototype.getValue,
-		setValue : Slider.prototype.setValue,
-		destroy : Slider.prototype.destroy,
-		disable : Slider.prototype.disable,
-		enable : Slider.prototype.enable,
-		toggle : Slider.prototype.toggle,
-		isEnabled: Slider.prototype.isEnabled,
-		on: Slider.prototype.on
-	};
-
-	/*** OLD CODE BELOW ***/
-
-
-	$.fn.slider = function (option) {
-		if (typeof option === 'string' && option !== 'refresh') {
-			var args = Array.prototype.slice.call(arguments, 1);
-			return invokePublicMethod.call(this, option, args);
-		} else {
-			return createNewSliderInstance.call(this, option);
-		}
-	};
-
-	function invokePublicMethod(methodName, args) {
-		if(publicMethods[methodName]) {
-			var sliderObject = retrieveSliderObjectFromElement(this);
-			var result = publicMethods[methodName].apply(sliderObject, args);
-
-			if (typeof result === "undefined") {
-				return $(this);
-			} else {
-				return result;
-			}
-		} else {
-			throw new Error("method '" + methodName + "()' does not exist for slider.");
-		}
+	*********************************/
+	if($) {
+		$.bridget( 'slider', Slider );
 	}
 
-	function retrieveSliderObjectFromElement(element) {
-		var sliderObject = $(element).data('slider');
-		if(sliderObject && sliderObject instanceof Slider) {
-			return sliderObject;
-		} else {
-			throw new Error(ErrorMsgs.callingContextNotSliderInstance);
-		}
-	}
-
-	function createNewSliderInstance(opts) {
-		var $this = $(this);
-		$this.each(function() {
-			var $this = $(this),
-				slider = $this.data('slider'),
-				options = typeof opts === 'object' && opts;
-
-			// If slider already exists, use its attributes
-			// as options so slider refreshes properly
-			if (slider && !options) {
-				options = {};
-
-				$.each($.fn.slider.defaults, function(key) {
-					options[key] = slider[key];
-				});
-			}
-
-			$this.data('slider', (new Slider(this, $.extend({}, $.fn.slider.defaults, options))));
-		});
-		return $this;
-	}
-
-
-	// $.fn.slider.defaults = {
-	// 	min: 0,
-	// 	max: 10,
-	// 	step: 1,
-	// 	precision: 0,
-	// 	orientation: 'horizontal',
-	// 	value: 5,
-	// 	range: false,
-	// 	selection: 'before',
-	// 	tooltip: 'show',
-	// 	tooltip_split: false,
-	// 	natural_arrow_keys: false,
-	// 	handle: 'round',
-	// 	reversed : false,
-	// 	enabled: true,
-	// 	formater: function(value) {
-	// 		return value;
-	// 	}
-	// };
-
-	// $.fn.slider.Constructor = Slider;
 
 })( window.jQuery );
