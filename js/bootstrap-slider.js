@@ -241,9 +241,11 @@ if ( typeof define === 'function' && define.amd ) {
 			this.sliderElem.appendChild(sliderTooltipMin);
 			this.sliderElem.appendChild(sliderTooltipMax);
 
-			/* Append slider element to parent container and hide this.element */
+			/* Append slider element to parent container */
 			parent.appendChild(this.sliderElem);
-			this.sliderElem.style.display = "none";
+			
+			/* Hide original <input> element */
+			this.element.style.display = "none";
 
 			function createAndAppendTooltipSubElements(tooltipElem) {
 				var arrow = document.createElement("div");
@@ -707,7 +709,7 @@ if ( typeof define === 'function' && define.amd ) {
 
 			this._triggerFocusOnHandle();
 
-			this.offset = _offset(this.sliderElem);
+			this.offset = this._offset(this.sliderElem);
 			this.size = this.sliderElem[this.sizePos];
 
 			var percentage = this._getPercentage(ev);
