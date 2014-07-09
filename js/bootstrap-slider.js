@@ -169,22 +169,22 @@
 
 		this.orientation = this.options.orientation;
 		if(this.orientation === 'vertical') {
-			addClass(this.sliderElem,'slider-vertical');
+			_addClass(this.sliderElem,'slider-vertical');
 			
 			this.stylePos = 'top';
 			this.mousePos = 'pageY';
 			this.sizePos = 'offsetHeight';
 
-			addClass(this.tooltip, 'right');
+			_addClass(this.tooltip, 'right');
 			this.tooltip.style.left = '100%';
 			
-			addClass(this.tooltip_min, 'right');
+			_addClass(this.tooltip_min, 'right');
 			this.tooltip_min.style.left = '100%';
 
-			addClass(this.tooltip_max, 'right');
+			_addClass(this.tooltip_max, 'right');
 			this.tooltip_max.style.left = '100%';
 		} else {
-			addClass(this.sliderElem, 'slider-horizontal');
+			_addClass(this.sliderElem, 'slider-horizontal');
 			this.sliderElem.style.width = origWidth;
 
 			this.orientation = 'horizontal';
@@ -192,13 +192,13 @@
 			this.mousePos = 'pageX';
 			this.sizePos = 'offsetWidth';
 			
-			addClass(this.tooltip, 'top');
+			_addClass(this.tooltip, 'top');
 			this.tooltip.style.top = -this.tooltip.outerHeight - 14 + 'px';
 			
-			addClass(this.tooltip_min, 'top');
+			_addClass(this.tooltip_min, 'top');
 			this.tooltip_min.style.top = -this.tooltip_min.outerHeight - 14 + 'px';
 
-			addClass(this.tooltip_max, 'top');
+			_addClass(this.tooltip_max, 'top');
 			this.tooltip_max.style.top = -this.tooltip_max.outerHeight - 14 + 'px';
 		}
 
@@ -211,7 +211,7 @@
 
 		this.selectionEl = sliderTrackSelection;
 		if (this.options.selection === 'none') {
-			addClass(this.selectionEl, 'hide');
+			_addClass(this.selectionEl, 'hide');
 		}
 
 		this.selectionElStyle = this.selectionEl.style;
@@ -231,11 +231,11 @@
 		var availableHandleModifiers = ['round', 'triangle', 'custom'];
 		var isValidHandleType = availableHandleModifiers.indexOf(this.options.handle) !== -1;
 		if (isValidHandleType) {
-			addClass(this.handle1, this.options.handle);
-			addClass(this.handle2, this.options.handle);
+			_addClass(this.handle1, this.options.handle);
+			_addClass(this.handle2, this.options.handle);
 		}
 
-		this.offset = offset(this.sliderElem);
+		this.offset = _offset(this.sliderElem);
 		this.size = this.sliderElem[this.sizePos];
 		
 		this.setValue(this.options.value);
@@ -265,9 +265,9 @@
 
 		// Bind tooltip-related handlers
 		if(this.options.tooltip === 'hide') {
-			addClass(this.tooltip, 'hide');
-			addClass(this.tooltip_min, 'hide');
-			addClass(this.tooltip_max, 'hide');
+			_addClass(this.tooltip, 'hide');
+			_addClass(this.tooltip_min, 'hide');
+			_addClass(this.tooltip_max, 'hide');
 		} else if(tooltip === 'always') {
 			this.showTooltip();
 			this.alwaysShowTooltip = true;
@@ -350,7 +350,7 @@
 			} else {
 				this.options.value = applyPrecision(this.options.value);
 				this.options.value = [ Math.max(this.min, Math.min(this.max, this.options.value))];
-				addClass(this.handle2, 'hide');
+				_addClass(this.handle2, 'hide');
 				if (this.selection === 'after') {
 					this.options.value[1] = this.options.max;
 				} else {
@@ -390,7 +390,7 @@
 			this.options.enabled = false;
 			this.handle1.removeAttribute("tabindex");
 			this.handle2.removeAttribute("tabindex");
-			addClass(this.sliderElem, 'slider-disabled');
+			_addClass(this.sliderElem, 'slider-disabled');
 			this._trigger('slideDisabled');
 		},
 
@@ -540,7 +540,7 @@
 
 			this._triggerFocusOnHandle();
 
-			this.offset = offset(this.sliderElem);
+			this.offset = _offset(this.sliderElem);
 			this.size = this.sliderElem[this.sizePos];
 
 			var percentage = this._getPercentage(ev);
@@ -795,7 +795,7 @@
 
 			element.className = newClasses.trim();
 		},
-		addClass: function(element, classString) {
+		_addClass: function(element, classString) {
 			var classes = classString.split(" ");
 			var newClasses = element.className;
 
@@ -811,7 +811,7 @@
 
 			element.className = newClasses.trim();
 		},
-		offset: function (obj) {
+		_offset: function (obj) {
 			var ol = ot = 0;
 			if (obj.offsetParent) {
 				do {
@@ -824,10 +824,10 @@
 				top: ot
 			};
 		},
-		css: function(elementRef, styleName, value) {
+		_css: function(elementRef, styleName, value) {
 			elementRef.style[styleName] = value;
 		},
-		removeHandleEventListeners: function(slideHandleRef) {
+		_removeHandleEventListeners: function(slideHandleRef) {
 			slideHandleRef.removeEventListener("focus");
 		}
 	};
