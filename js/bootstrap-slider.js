@@ -337,9 +337,9 @@
 			if (!val) {
 				val = 0;
 			}
-			this.options.value = this.validateInputValue(val);
+			this.options.value = this._validateInputValue(val);
 
-			var applyPrecision = applyPrecision.bind(this);
+			var applyPrecision = this._applyPrecision.bind(this);
 
 			if (this.range) {
 				this.options.value[0] = applyPrecision(this.options.value[0]);
@@ -373,8 +373,8 @@
 
 			if(triggerSlideEvent === true) {
 				var slideEventValue = this.options.range ? this.options.value : this.options.value[0];
-				trigger.call(this, 'slide', slideEventValue);
-				setDataVal.call(this, slideEventValue);
+				this._trigger('slide', slideEventValue);
+				this._setDataVal(slideEventValue);
 			}
 		},
 
@@ -391,7 +391,7 @@
 			this.handle1.removeAttribute("tabindex");
 			this.handle2.removeAttribute("tabindex");
 			addClass(this.sliderElem, 'slider-disabled');
-			trigger.call(this, 'slideDisabled');
+			this._trigger('slideDisabled');
 		},
 
 		enable: function() {
@@ -399,7 +399,7 @@
 			this.handle1.setAttribute("tabindex", 0);
 			this.handle2.setAttribute("tabindex", 0);
 			removeClass(this.sliderElem, 'slider-disabled');
-			trigger.call(this, 'slideEnabled');
+			this._trigger('slideEnabled');
 		},
 
 		toggle: function() {
@@ -556,8 +556,8 @@
 			this.percentage[this.dragged] = this.options.reversed ? 100 - percentage : percentage;
 			this._layout();
 
-			this.mousemove = this.mousemove.bind(this);
-			this.mouseup = this.mouseup.bind(this);
+			this.mousemove = this._mousemove.bind(this);
+			this.mouseup = this._mouseup.bind(this);
 
 			if (this.touchCapable) {
 				// Touch: Bind touch events:
@@ -586,7 +586,7 @@
 				this.handle2.focus();
 			}
 		},
-		keydown: function(handleIdx, ev) {
+		_keydown: function(handleIdx, ev) {
 			if(!this.options.enabled) {
 				return false;
 			}
@@ -641,7 +641,7 @@
 			
 			return false;
 		},
-		mousemove: function(ev) {
+		_mousemove: function(ev) {
 			if(!this.options.enabled) {
 				return false;
 			}
@@ -660,7 +660,7 @@
 
 			return false;
 		},
-		adjustPercentageForRangeSliders: function(percentage) {
+		_adjustPercentageForRangeSliders: function(percentage) {
 			if (this.range) {
 				if (this.dragged === 0 && this.percentage[1] < percentage) {
 					this.percentage[0] = this.percentage[1];
@@ -671,7 +671,7 @@
 				}
 			}
 		},
-		mouseup: function() {
+		_mouseup: function() {
 			if(!this.options.enabled) {
 				return false;
 			}
@@ -697,7 +697,7 @@
 			
 			return false;
 		},
-		calculateValue: function() {
+		_calculateValue: function() {
 			var val;
 			if (this.range) {
 				val = [this.options.min,this.options.max];
@@ -724,16 +724,16 @@
 			}
 			return val;
 		},
-		applyPrecision: function(val) {
+		_applyPrecision: function(val) {
 			var precision = this.options.precision || this._getNumDigitsAfterDecimalPlace(this.step);
 			return this._applyToFixedAndParseFloat(val, precision);
 		},
-		getNumDigitsAfterDecimalPlace: function(num) {
+		_getNumDigitsAfterDecimalPlace: function(num) {
 			var match = (''+num).match(/(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/);
 			if (!match) { return 0; }
 			return Math.max(0, (match[1] ? match[1].length : 0) - (match[2] ? +match[2] : 0));
 		},
-		applyToFixedAndParseFloat: function(num, toFixedInput) {
+		_applyToFixedAndParseFloat: function(num, toFixedInput) {
 			var truncatedNum = num.toFixed(toFixedInput);
 			return parseFloat(truncatedNum);
 		},
@@ -741,7 +741,7 @@
 			Credits to Mike Samuel for the following method!
 			Source: http://stackoverflow.com/questions/10454518/javascript-how-to-retrieve-the-number-of-decimals-of-a-string-number
 		*/
-		getPercentage: function(ev) {
+		_getPercentage: function(ev) {
 			if (this.touchCapable && (ev.type === 'touchstart' || ev.type === 'touchmove')) {
 				ev = ev.touches[0];
 			}
@@ -749,21 +749,86 @@
 			percentage = Math.round(percentage/this.percentage[2])*this.percentage[2];
 			return Math.max(0, Math.min(100, percentage));
 		},
-		validateInputValue: function(val) {
+		_validateInputValue: function(val) {
 			if(typeof val === 'number') {
 				return val;
 			} else if(val instanceof Array) {
-				validateArray(val);
+				this._validateArray(val);
 				return val;
 			} else {
 				throw new Error( ErrorMsgs.formatInvalidInputErrorMsg(val) );
 			}
 		},
-		validateArray: function(val) {
+		_validateArray: function(val) {
 			for(var i = 0; i < val.length; i++) {
 				var input =  val[i];
 				if (typeof input !== 'number') { throw new Error( ErrorMsgs.formatInvalidInputErrorMsg(input) ); }
 			}
+		},
+		_setDataVal: function(val) {
+			var value = "value: '" + val + "'";
+			this.element.setAttribute('data', value);
+		},
+		_trigger: function(evt, val) {
+			var callbackFn = this.eventToCallbackMap[evt];
+			if(callbackFn) {
+				val = val || undefined;
+				callbackFn(val);
+			}
+		},
+		_setText: function(element, text) {
+			if(element.innerText) {
+		 		element.innerText = text;
+		 	} else if(element.textContent) {
+		 		element.textContent = text;
+		 	}
+		},
+		_removeClass: function(element, classString) {
+			var classes = classString.split(" ");
+			var newClasses = element.className;
+
+			for(var i = 0; i < classes.length; i++) {
+				var classTag = classes[i];
+				var regex = new RegExp("(?:\\s|^)" + classTag + "(?:\\s|$)");
+				newClasses = newClasses.replace(regex, " ");
+			}
+
+			element.className = newClasses.trim();
+		},
+		addClass: function(element, classString) {
+			var classes = classString.split(" ");
+			var newClasses = element.className;
+
+			for(var i = 0; i < classes.length; i++) {
+				var classTag = classes[i];
+				var regex = new RegExp("(?:\\s|^)" + classTag + "(?:\\s|$)");
+				var ifClassExists = regex.test(newClasses);
+				
+				if(!ifClassExists) {
+					newClasses += " " + classTag;
+				}
+			}
+
+			element.className = newClasses.trim();
+		},
+		offset: function (obj) {
+			var ol = ot = 0;
+			if (obj.offsetParent) {
+				do {
+				  ol += obj.offsetLeft;
+				  ot += obj.offsetTop;
+				} while (obj = obj.offsetParent);
+			}
+			return {
+				left: ol,
+				top: ot
+			};
+		},
+		css: function(elementRef, styleName, value) {
+			elementRef.style[styleName] = value;
+		},
+		removeHandleEventListeners: function(slideHandleRef) {
+			slideHandleRef.removeEventListener("focus");
 		}
 	};
 
@@ -777,78 +842,6 @@
 
 
 	********************************/
-
-	function setDataVal(val) {
-		var value = "value: '" + val + "'";
-		this.element.setAttribute('data', value);
-	}
-
-	function trigger(evt, val) {
-		var callbackFn = this.eventToCallbackMap[evt];
-		if(callbackFn) {
-			callbackFn(val);
-		}
-	}
-
-	function setText(element, text) {
-		 if(element.innerText) {
-		 	element.innerText = text;
-		 } else if(element.textContent) {
-		 	element.textContent = text;
-		 }
-	}
-
-	function removeClass(element, classString) {
-		var classes = classString.split(" ");
-		var newClasses = element.className;
-
-		for(var i = 0; i < classes.length; i++) {
-			var classTag = classes[i];
-			var regex = new RegExp("(?:\\s|^)" + classTag + "(?:\\s|$)");
-			newClasses = newClasses.replace(regex, " ");
-		}
-
-		element.className = newClasses.trim();
-	}
-
-	function addClass(element, classString) {
-		var classes = classString.split(" ");
-		var newClasses = element.className;
-
-		for(var i = 0; i < classes.length; i++) {
-			var classTag = classes[i];
-			var regex = new RegExp("(?:\\s|^)" + classTag + "(?:\\s|$)");
-			var ifClassExists = regex.test(newClasses);
-			
-			if(!ifClassExists) {
-				newClasses += " " + classTag;
-			}
-		}
-
-		element.className = newClasses.trim();
-	}
-
-	function offset(obj) {
-		var ol = ot = 0;
-		if (obj.offsetParent) {
-			do {
-			  ol += obj.offsetLeft;
-			  ot += obj.offsetTop;
-			} while (obj = obj.offsetParent);
-		}
-		return {
-			left: ol,
-			top: ot
-		};
-	}
-
-	function css(elementRef, styleName, value) {
-		elementRef.style[styleName] = value;
-	}
-
-	function removeHandleEventListeners(slideHandleRef) {
-		slideHandleRef.removeEventListener("focus");=
-	}
 
 	var publicMethods = {
 		getValue : Slider.prototype.getValue,
