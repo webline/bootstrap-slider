@@ -178,7 +178,7 @@ if ( typeof define === 'function' && define.amd ) {
 						CONSTRUCTOR
 
 	**************************************************/
-	function Slider(element, options) {
+	var Slider = function(element, options) {
 		/*************************************************
 					
 						Create Markup
@@ -370,10 +370,10 @@ if ( typeof define === 'function' && define.amd ) {
 		this.selectionElStyle = this.selectionEl.style;
 
 		this.handle1 = sliderMinHandle;
-		this.handle1Stype = this.handle1.style;
+		this.handle1Style = this.handle1.style;
 
 		this.handle2 = sliderMaxHandle;
-		this.handle2Stype = this.handle2.style;
+		this.handle2Style = this.handle2.style;
 
 		if (updateSlider === true) {
 			// Reset classes
@@ -395,7 +395,7 @@ if ( typeof define === 'function' && define.amd ) {
 
 		/******************************************
 					
-						Bind Events
+					Bind Event Listeners
 
 		******************************************/
 
@@ -408,7 +408,7 @@ if ( typeof define === 'function' && define.amd ) {
 
 		if (this.touchCapable) {
 			// Bind touch handlers
-			this.mousedown = this._mousedown.bind(this, 0);
+			this.mousedown = this._mousedown.bind(this);
 			this.sliderElem.addEventListener("touchstart", this.mousedown, false);
 		} else {
 			// Bind mouse handlers
@@ -443,6 +443,8 @@ if ( typeof define === 'function' && define.amd ) {
 		} else {
 			this.disable();
 		}
+
+		return this;
 	}
 
 	/*************************************************
@@ -454,6 +456,8 @@ if ( typeof define === 'function' && define.amd ) {
 
 	**************************************************/
 	Slider.prototype = {
+		constructor: Slider,
+
 		options: {
 			id: "",
 		  	min: 0,
@@ -480,7 +484,7 @@ if ( typeof define === 'function' && define.amd ) {
 		inDrag: false,
 
 		getValue: function() {
-			if (this.range) {
+			if (this.options.range) {
 				return this.options.value;
 			}
 			return this.options.value[0];
@@ -494,7 +498,7 @@ if ( typeof define === 'function' && define.amd ) {
 
 			var applyPrecision = this._applyPrecision.bind(this);
 
-			if (this.range) {
+			if (this.options.range) {
 				this.options.value[0] = applyPrecision(this.options.value[0]);
 				this.options.value[1] = applyPrecision(this.options.value[1]); 
 
@@ -513,9 +517,9 @@ if ( typeof define === 'function' && define.amd ) {
 			this.diff = this.options.max - this.options.min;
 			if (this.diff > 0) {
 				this.percentage = [
-					(this.options.value[0] - this.min) * 100 / this.diff,
-					(this.options.value[1] - this.min) * 100 / this.diff,
-					this.step * 100 / this.diff
+					(this.options.value[0] - this.options.min) * 100 / this.diff,
+					(this.options.value[1] - this.options.min) * 100 / this.diff,
+					this.options.step * 100 / this.diff
 				];
 			} else {
 				this.percentage = [0, 0, 100];
@@ -624,8 +628,8 @@ if ( typeof define === 'function' && define.amd ) {
 				positionPercentages = [ this.percentage[0], this.percentage[1] ];
 			}
 
-			this.handle1Stype[this.stylePos] = positionPercentages[0]+'%';
-			this.handle2Stype[this.stylePos] = positionPercentages[1]+'%';
+			this.handle1Style[this.stylePos] = positionPercentages[0]+'%';
+			this.handle2Style[this.stylePos] = positionPercentages[1]+'%';
 
 			if (this.options.orientation === 'vertical') {
 				this.selectionElStyle.top = Math.min(positionPercentages[0], positionPercentages[1]) +'%';
@@ -648,7 +652,7 @@ if ( typeof define === 'function' && define.amd ) {
 		        }
  			}
 
-			if (this.range) {
+			if (this.options.range) {
 				this._setText(this.tooltipInner, this.options.formatter(this.options.value[0]) + this.options.formatter(this.options.value[1]));
 				this.tooltip.style[this.stylePos] = (positionPercentages[1] + positionPercentages[0])/2 + '%';
 
@@ -699,6 +703,9 @@ if ( typeof define === 'function' && define.amd ) {
 			}
 		},
 		_mousedown: function(ev) {
+			console.log("WE DOWN");
+
+
 			if(!this.options.enabled) {
 				return false;
 			}
@@ -714,7 +721,7 @@ if ( typeof define === 'function' && define.amd ) {
 
 			var percentage = this._getPercentage(ev);
 
-			if (this.range) {
+			if (this.options.range) {
 				var diff1 = Math.abs(this.percentage[0] - percentage);
 				var diff2 = Math.abs(this.percentage[1] - percentage);
 				this.dragged = (diff1 < diff2) ? 0 : 1;
@@ -830,7 +837,7 @@ if ( typeof define === 'function' && define.amd ) {
 			return false;
 		},
 		_adjustPercentageForRangeSliders: function(percentage) {
-			if (this.range) {
+			if (this.options.range) {
 				if (this.dragged === 0 && this.percentage[1] < percentage) {
 					this.percentage[0] = this.percentage[1];
 					this.dragged = 1;
@@ -868,7 +875,7 @@ if ( typeof define === 'function' && define.amd ) {
 		},
 		_calculateValue: function() {
 			var val;
-			if (this.range) {
+			if (this.options.range) {
 				val = [this.options.min,this.options.max];
 		        if (this.percentage[0] !== 0){
 		            val[0] = (Math.max(this.options.min, this.options.min + Math.round((this.diff * this.percentage[0]/100)/this.options.step)*this.options.step));
