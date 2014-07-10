@@ -540,13 +540,14 @@ $("#ex11").slider({step: 20000, min: 0, max: 200000});
     	$(document).ready(function() {
     		/* Example 1 */
 	    	$('#ex1').slider({
-	          	formater: function(value) {
+	          	formatter: function(value) {
 	            	return 'Current value: ' + value;
 	          	}
 	        });
 
 	    	/* Example 2 */
-	        $("#ex2").slider({});
+	        // $("#ex2").slider({});
+	        slider2 = new Slider("#ex2");
 
 	        /* Example 3 */
 	        var RGBChange = function() {
@@ -602,16 +603,16 @@ $("#ex11").slider({step: 20000, min: 0, max: 200000});
 				value: 8.115
 			});
 
-    	/* Example 10 */
-      $("#ex10").slider({});
+	    	/* Example 10 */
+	      	$("#ex10").slider({});
 
-      /* Example 11 */
-      $("#ex11").slider({
-        step: 20000,
-        min: 0,
-        value: 0,
-        max: 200000
-      });
+	      	/* Example 11 */
+	      	$("#ex11").slider({
+	        	step: 20000,
+	        	min: 0,
+	        	value: 0,
+	        	max: 200000
+	      	});
 
     	});
     </script>
