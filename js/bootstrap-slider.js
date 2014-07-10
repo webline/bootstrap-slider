@@ -130,7 +130,7 @@
 		          instance = new PluginClass( this, options );
 		          $.data( this, namespace, instance );
 		        }
-		        return instance;
+		        return $(this);
 		      });
 
 		      if(!objects || objects.length > 1) {
@@ -561,6 +561,8 @@
 				this._trigger('slide', slideEventValue);
 				this._setDataVal(slideEventValue);
 			}
+
+			return this;
 		},
 
 		destroy: function(){
@@ -587,8 +589,11 @@
 
 			// Clear out custom event bindings
 			this._cleanUpEventCallbacksMap();
+
+			// Remove JQuery handlers/data
 			if(window.$) {
 				this._unbindJQueryEventHandlers();
+				this.$element.removeData('slider');
 			}
 		},
 
@@ -598,6 +603,8 @@
 			this.handle2.removeAttribute("tabindex");
 			this._addClass(this.sliderElem, 'slider-disabled');
 			this._trigger('slideDisabled');
+
+			return this;
 		},
 
 		enable: function() {
@@ -606,6 +613,8 @@
 			this.handle2.setAttribute("tabindex", 0);
 			this._removeClass(this.sliderElem, 'slider-disabled');
 			this._trigger('slideEnabled');
+
+			return this;
 		},
 
 		toggle: function() {
@@ -614,6 +623,8 @@
 			} else {
 				this.enable();
 			}
+
+			return this;
 		},
 
 		isEnabled: function() {

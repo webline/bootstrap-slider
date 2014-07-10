@@ -49,7 +49,7 @@
       "css": "dist/css/bootstrap-slider.css",
       "cssMin": "dist/css/bootstrap-slider.min.css"
     },
-    "spec": "spec/**/*.js"
+    "spec": "spec/EventsSpec.js"
   },
   "devDependencies": {
     "grunt": "~0.4.4"

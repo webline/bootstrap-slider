@@ -546,73 +546,73 @@ $("#ex11").slider({step: 20000, min: 0, max: 200000});
 	        });
 
 	    	/* Example 2 */
-	        slider2 = $("#ex2").slider({});
-	        // slider2 = new Slider("#ex2");
+	  		// $("#ex2").slider({});
 
-	        /* Example 3 */
-	        var RGBChange = function() {
-	          $('#RGB').css('background', 'rgb('+r.getValue()+','+g.getValue()+','+b.getValue()+')')
-	        };
 
-	        var r = $('#R').slider()
-	                	.on('slide', RGBChange)
-	                	.data('slider');
-	        var g = $('#G').slider()
-	                	.on('slide', RGBChange)
-	                	.data('slider');
-	        var b = $('#B').slider()
-	                	.on('slide', RGBChange)
-	                	.data('slider');
+	  //       /* Example 3 */
+	  //       var RGBChange = function() {
+	  //         $('#RGB').css('background', 'rgb('+r.getValue()+','+g.getValue()+','+b.getValue()+')')
+	  //       };
 
-	        /* Example 4 */
-	        $("#ex4").slider({
-	        	reversed : true
-	        });
+	  //       var r = $('#R').slider()
+	  //               	.on('slide', RGBChange)
+	  //               	.data('slider');
+	  //       var g = $('#G').slider()
+	  //               	.on('slide', RGBChange)
+	  //               	.data('slider');
+	  //       var b = $('#B').slider()
+	  //               	.on('slide', RGBChange)
+	  //               	.data('slider');
 
-	        /* Example 5 */
-	        $("#ex5").slider();
-			$("#destroyEx5Slider").click(function() {
-				$("#ex5").slider('destroy');
-			});
+	  //       /* Example 4 */
+	  //       $("#ex4").slider({
+	  //       	reversed : true
+	  //       });
 
-			/* Example 6 */
-			$("#ex6").slider();
-			$("#ex6").on('slide', function(slideEvt) {
-				$("#ex6SliderVal").text(slideEvt.value);
-			});
+	  //       /* Example 5 */
+	  //       $("#ex5").slider();
+			// $("#destroyEx5Slider").click(function() {
+			// 	$("#ex5").slider('destroy');
+			// });
 
-			/* Example 7 */
-			$("#ex7").slider();
-			$("#ex7-enabled").click(function() {
-				if(this.checked) {
-					$("#ex7").slider("enable");
-				}
-				else {
-					$("#ex7").slider("disable");
-				}
-			});
+			// /* Example 6 */
+			// $("#ex6").slider();
+			// $("#ex6").on('slide', function(slideEvt) {
+			// 	$("#ex6SliderVal").text(slideEvt.value);
+			// });
 
-			/* Example 8 */
-			$("#ex8").slider({
-				tooltip: 'always'
-			});
+			// /* Example 7 */
+			// $("#ex7").slider();
+			// $("#ex7-enabled").click(function() {
+			// 	if(this.checked) {
+			// 		$("#ex7").slider("enable");
+			// 	}
+			// 	else {
+			// 		$("#ex7").slider("disable");
+			// 	}
+			// });
 
-			/* Example 9 */
-			$("#ex9").slider({
-				step: 0.01,
-				value: 8.115
-			});
+			// /* Example 8 */
+			// $("#ex8").slider({
+			// 	tooltip: 'always'
+			// });
 
-	    	/* Example 10 */
-	      	$("#ex10").slider({});
+			// /* Example 9 */
+			// $("#ex9").slider({
+			// 	step: 0.01,
+			// 	value: 8.115
+			// });
 
-	      	/* Example 11 */
-	      	$("#ex11").slider({
-	        	step: 20000,
-	        	min: 0,
-	        	value: 0,
-	        	max: 200000
-	      	});
+	  //   	/* Example 10 */
+	  //     	$("#ex10").slider({});
+
+	  //     	/* Example 11 */
+	  //     	$("#ex11").slider({
+	  //       	step: 20000,
+	  //       	min: 0,
+	  //       	value: 0,
+	  //       	max: 200000
+	  //     	});
 
     	});
     </script>
