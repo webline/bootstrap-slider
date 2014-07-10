@@ -119,7 +119,7 @@
 		      // return this if no return value
 		      return this;
 		    } else {
-		      return this.each( function() {
+		      var objects = this.map( function() {
 		        var instance = $.data( this, namespace );
 		        if ( instance ) {
 		          // apply options & init
@@ -130,7 +130,14 @@
 		          instance = new PluginClass( this, options );
 		          $.data( this, namespace, instance );
 		        }
+		        return instance;
 		      });
+
+		      if(!objects || objects.length > 1) {
+		      	return objects;
+		      } else {
+		      	return objects[0];
+		      }
 		    }
 		  };
 
@@ -578,8 +585,10 @@
 			/* Show original <input> element */
 			this.element.style.display = "";
 
+			// Clear out custom event bindings
+			this._cleanUpEventCallbacksMap();
 			if(window.$) {
-				this._unbindJQueryEvents();
+				this._unbindJQueryEventHandlers();
 			}
 		},
 
@@ -612,12 +621,17 @@
 		},
 
 		on: function(evt, callback) {
-			var callbacksArray = this.eventToCallbackMap[evt];
-			if(callbacksArray) {
-				callbacksArray.push(callback);
+			if(window.$) {
+				this.$element.on(evt, callback);
+				this.$sliderElem.on(evt, callback);
 			} else {
-				this.eventToCallbackMap[evt] = [];
+				this._bindNonQueryEventHandler(evt, callback);
 			}
+			return this;
+		},
+
+		data: function() {
+			return this;
 		},
 		
 		/******************************+
@@ -630,6 +644,21 @@
 		  					_fnName : function() {...}
 
 		********************************/
+		_bindNonQueryEventHandler: function(evt, callback) {
+			var callbacksArray = this.eventToCallbackMap[evt];
+			if(callbacksArray) {
+				callbacksArray.push(callback);
+			} else {
+				this.eventToCallbackMap[evt] = [];
+			}
+		},
+		_cleanUpEventCallbacksMap: function() {
+			var eventNames = Object.keys(this.eventToCallbackMap);
+			for(var i = 0; i < eventNames.length; i++) {
+				var eventName = eventNames[i];
+				this.eventToCallbackMap[eventName] = null;
+			}
+		},
 		_showTooltip: function() {
 			if (this.options.tooltip_split === false ){
             	this._addClass(this.tooltip, 'in');
@@ -976,9 +1005,12 @@
 		_trigger: function(evt, val) {
 			val = val || undefined;
 
-			var callbackFn = this.eventToCallbackMap[evt];
-			if(callbackFn) {
-				callbackFn(val);
+			var callbackFnArray = this.eventToCallbackMap[evt];
+			if(callbackFnArray && callbackFnArray.length) {
+				for(var i = 0; i < callbackFnArray.length; i++) {
+					var callbackFn = callbackFnArray[i];
+					callbackFn(val);
+				}
 			}
 
 			/* If JQuery exists, trigger JQuery events */
@@ -994,7 +1026,7 @@
 			this.$element.trigger(eventData);
 			this.$sliderElem.trigger(eventData);
 		},
-		_unbindJQueryEvents: function() {
+		_unbindJQueryEventHandlers: function() {
 			this.$element.off();
 			this.$sliderElem.off();
 		},
