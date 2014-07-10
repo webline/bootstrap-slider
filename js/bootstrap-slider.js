@@ -250,8 +250,8 @@
 			this.sliderElem.appendChild(sliderTooltipMin);
 			this.sliderElem.appendChild(sliderTooltipMax);
 
-			/* Append slider element to parent container */
-			parent.appendChild(this.sliderElem);
+			/* Append slider element to parent container, right before the original <input> element */
+			parent.insertBefore(this.sliderElem, this.element);
 			
 			/* Hide original <input> element */
 			this.element.style.display = "none";
@@ -482,7 +482,11 @@
 			reversed: false,
 			enabled: true,
 			formatter: function(val) {
-				return val;
+				if(val instanceof Array) {
+					return val[0] + " : " + val[1];
+				} else {
+					return val;
+				}
 			},
 			natural_arrow_keys: false
 		},
@@ -562,13 +566,15 @@
 
 			// Remove the slider from the DOM
 			this.sliderElem.parentNode.removeChild(this.sliderElem);
+			/* Show original <input> element */
+			this.element.style.display = "";
 		},
 
 		disable: function() {
 			this.options.enabled = false;
 			this.handle1.removeAttribute("tabindex");
 			this.handle2.removeAttribute("tabindex");
-			_addClass(this.sliderElem, 'slider-disabled');
+			this._addClass(this.sliderElem, 'slider-disabled');
 			this._trigger('slideDisabled');
 		},
 
@@ -661,8 +667,12 @@
 		        }
  			}
 
+
+ 			var formattedTooltipVal;
+
 			if (this.options.range) {
-				this._setText(this.tooltipInner, this.options.formatter(this.options.value[0]) + this.options.formatter(this.options.value[1]));
+				formattedTooltipVal = this.options.formatter(this.options.value);
+				this._setText(this.tooltipInner, formattedTooltipVal);
 				this.tooltip.style[this.stylePos] = (positionPercentages[1] + positionPercentages[0])/2 + '%';
 
 				if (this.options.orientation === 'vertical') {
@@ -699,8 +709,8 @@
 					this._css(this.tooltip_max, 'margin-left', -this.tooltip_max.offsetWidth / 2 + 'px');
 				}
 			} else {
-				var innerTooltipText = this.options.formatter(this.options.value[0]);
-				this._setText(this.tooltipInner, innerTooltipText);
+				formattedTooltipVal = this.options.formatter(this.options.value[0]);
+				this._setText(this.tooltipInner, formattedTooltipVal);
 
 				this.tooltip.style[this.stylePos] = positionPercentages[0] + '%';
 				if (this.options.orientation === 'vertical') {
