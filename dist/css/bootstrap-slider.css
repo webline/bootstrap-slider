@@ -80,6 +80,9 @@
 .slider input {
   display: none;
 }
+.slider .tooltip.top {
+  margin-top: -36px;
+}
 .slider .tooltip-inner {
   white-space: nowrap;
 }

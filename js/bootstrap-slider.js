@@ -2,10 +2,10 @@
  * bootstrap-slider.js v3.0.0
  *
  * Maintainers: 
- * 		Kyle Kemp 
- *			- Twitter: @seiyra
- *			- Github:  seiyra
- * 		Rohit Kalkur
+ *		Kyle Kemp 
+ *			- Twitter: @seiyria
+ *			- Github:  seiyria
+ *		Rohit Kalkur
  *			- Twitter: @Rovolutionary
  *			- Github:  rovolution
  *
@@ -47,7 +47,7 @@
 
 		// bail if no jQuery
 		if ( !$ ) {
-		  return;
+			return;
 		}
 
 		// -------------------------- addOptionMethod -------------------------- //
@@ -57,10 +57,10 @@
 		 * @param {Function} PluginClass - constructor class
 		 */
 		function addOptionMethod( PluginClass ) {
-		  // don't overwrite original option method
-		  if ( PluginClass.prototype.option ) {
-		    return;
-		  }
+			// don't overwrite original option method
+			if ( PluginClass.prototype.option ) {
+				return;
+			}
 
 		  // option setter
 		  PluginClass.prototype.option = function( opts ) {
@@ -205,6 +205,10 @@
 		var parent = this.element.parentNode;
 		var sliderAlreadyExists = parent.className.search("(?:\\s|^)slider(?:\\s|$)") !== -1;
 
+		var sliderTrackSelection;
+		var sliderMinHandle;
+		var sliderMaxHandle;
+
 		if (sliderAlreadyExists) {
 			updateSlider = true;
 			this.sliderElem = parent;
@@ -217,18 +221,29 @@
 			var sliderTrack = document.createElement("div");
 			sliderTrack.className = "slider-track";
 
-			var sliderTrackSelection = document.createElement("div");
+			sliderTrackSelection = document.createElement("div");
 			sliderTrackSelection.className = "slider-selection";
 
-			var sliderMinHandle = document.createElement("div");
+			sliderMinHandle = document.createElement("div");
 			sliderMinHandle.className = "slider-handle min-slider-handle";
 
-			var sliderMaxHandle = document.createElement("div");
+			sliderMaxHandle = document.createElement("div");
 			sliderMaxHandle.className = "slider-handle max-slider-handle";
 
 			sliderTrack.appendChild(sliderTrackSelection);
 			sliderTrack.appendChild(sliderMinHandle);
 			sliderTrack.appendChild(sliderMaxHandle);
+
+			var createAndAppendTooltipSubElements = function(tooltipElem) {
+				var arrow = document.createElement("div");
+				arrow.className = "tooltip-arrow";
+
+				var inner = document.createElement("div");
+				inner.className = "tooltip-inner";
+
+				tooltipElem.appendChild(arrow);
+				tooltipElem.appendChild(inner);
+			};
 
 			/* Create tooltip elements */
 			var sliderTooltip = document.createElement("div");
@@ -255,17 +270,6 @@
 			
 			/* Hide original <input> element */
 			this.element.style.display = "none";
-
-			function createAndAppendTooltipSubElements(tooltipElem) {
-				var arrow = document.createElement("div");
-				arrow.className = "tooltip-arrow";
-
-				var inner = document.createElement("div");
-				inner.className = "tooltip-inner";
-
-				tooltipElem.appendChild(arrow);
-				tooltipElem.appendChild(inner);
-			}
 		}
 		/* If JQuery exists, cache JQ references */
 		if(window.$) {
@@ -458,7 +462,7 @@
 		}
 
 		return this;
-	}
+	};
 
 	/*************************************************
 					
@@ -990,7 +994,7 @@
 			this.$element.trigger(eventData);
 			this.$sliderElem.trigger(eventData);
 		},
-		_unbindJQueryEvents: function(evt, val) {
+		_unbindJQueryEvents: function() {
 			this.$element.off();
 			this.$sliderElem.off();
 		},

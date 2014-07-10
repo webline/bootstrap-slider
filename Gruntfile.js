@@ -13,6 +13,12 @@ module.exports = function(grunt) {
       }
     },
     jshint: {
+      ignore_warning: {
+        options: {
+          '-W099': true
+        },
+        src: '<%= pkg.main %>'
+      },
       options: {
         curly: true,
         eqeqeq: true,
@@ -28,7 +34,9 @@ module.exports = function(grunt) {
         browser: true,
         globals: {
           $ : true,
-          Modernizr : true
+          Modernizr : true,
+          console: true,
+          define: true
         }
       },
       gruntfile: {
