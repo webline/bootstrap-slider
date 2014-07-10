@@ -35,8 +35,8 @@ describe("Element Data Attributes Tests", function() {
   it("reads the 'data-slider-orientation' property and sets it on slider", function() {
     slider = $("#orientationSlider").slider();
       
-    var orientationClassApplied = $("#orientationSlider").parent("div.slider").hasClass("slider-vertical");
-    expect(orientationClassApplied).toBeTruthy();
+    var orientationIsVertical = $("#orientationSlider").data('slider').options.orientation === 'vertical';
+    expect(orientationIsVertical).toBeTruthy();
   });
 
   it("reads the 'data-slider-value' property and sets it on slider", function() {

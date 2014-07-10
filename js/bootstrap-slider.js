@@ -523,7 +523,6 @@
 				val = 0;
 			}
 			this.options.value = this._validateInputValue(val);
-
 			var applyPrecision = this._applyPrecision.bind(this);
 
 			if (this.options.range) {

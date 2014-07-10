@@ -78,7 +78,7 @@ module.exports = function(grunt) {
       src : '<%= pkg.main %>',
       options : {
         specs : '<%= pkg.gruntConfig.spec %>',
-        vendor : ['<%= pkg.gruntConfig.js.jquery %>'],
+        vendor : ['<%= pkg.gruntConfig.js.jquery %>', '<%= pkg.gruntConfig.js.bindPolyfill %>'],
         styles : ['<%= pkg.gruntConfig.css.bootstrap %>', '<%= pkg.gruntConfig.css.slider %>'],
         template : '<%= pkg.gruntConfig.tpl.SpecRunner %>'
       }

@@ -31,7 +31,8 @@
     "devPort": 9000,
     "js": {
       "modernizr": "bower_components/modernizr/modernizr.js",
-      "jquery": "bower_components/jquery/dist/jquery.min.js"
+      "jquery": "bower_components/jquery/dist/jquery.min.js",
+      "bindPolyfill": "test/phantom_bind_polyfill.js"
     },
     "less": {
       "slider": "less/bootstrap-slider.less"
@@ -49,7 +50,7 @@
       "css": "dist/css/bootstrap-slider.css",
       "cssMin": "dist/css/bootstrap-slider.min.css"
     },
-    "spec": "spec/EventsSpec.js"
+    "spec": "test/specs/ElementDataAttributesSpec.js"
   },
   "devDependencies": {
     "grunt": "~0.4.4"
