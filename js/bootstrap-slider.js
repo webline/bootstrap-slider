@@ -267,6 +267,11 @@
 				tooltipElem.appendChild(inner);
 			}
 		}
+		/* If JQuery exists, cache JQ references */
+		if(window.$) {
+			this.$element = $(this.element);
+			this.$sliderElem = $(this.sliderElem);
+		}
 
 		/*************************************************
 					
@@ -282,9 +287,9 @@
 			// First check the data atrributes
 			var val = getDataAttrib(this.element, optName);
 			// If no data attrib, then check if an option was passed in via the constructor
-			val = val ? val : options[optName];
+			val = (val !== null) ? val : options[optName];
 			// Finally, if nothing was specified, use the defaults
-			val = val ? val : this.defaultOptions[optName];
+			val = (typeof val !== 'undefined') ? val : this.defaultOptions[optName];
 
 			// Set all options on the instance of the Slider
 			if(!this.options) {
@@ -568,6 +573,10 @@
 			this.sliderElem.parentNode.removeChild(this.sliderElem);
 			/* Show original <input> element */
 			this.element.style.display = "";
+
+			if(window.$) {
+				this._unbindJQueryEvents();
+			}
 		},
 
 		disable: function() {
@@ -966,6 +975,19 @@
 				val = val || undefined;
 				callbackFn(val);
 			}
+
+			/* If JQuery exists, trigger JQuery events */
+			if(window.$) {
+				this._triggerJQueryEvent(evt, val);
+			}
+		},
+		_triggerJQueryEvent: function(evt, val) {
+			this.$element.trigger(evt, val);
+			this.$sliderElem.trigger(evt, val);
+		},
+		_unbindJQueryEvents: function(evt, val) {
+			this.$element.off();
+			this.$sliderElem.off();
 		},
 		_setText: function(element, text) {
 			if(typeof element.innerText !== "undefined") {
