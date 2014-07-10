@@ -37,7 +37,8 @@ module.exports = function(grunt) {
           Modernizr : true,
           console: true,
           define: true
-        }
+        },
+        "-W099": true,
       },
       gruntfile: {
         src: 'Gruntfile.js'
