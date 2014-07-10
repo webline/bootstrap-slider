@@ -286,6 +286,7 @@
 			// Finally, if nothing was specified, use the defaults
 			val = val ? val : this.defaultOptions[optName];
 
+			// Set all options on the instance of the Slider
 			if(!this.options) {
 				this.options = {};
 			}
