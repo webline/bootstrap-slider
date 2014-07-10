@@ -852,7 +852,7 @@
 
 			var percentage = this._getPercentage(ev);
 			this._adjustPercentageForRangeSliders(percentage);
-			this.percentage[this.dragged] = this.reversed ? 100 - percentage : percentage;
+			this.percentage[this.dragged] = this.options.reversed ? 100 - percentage : percentage;
 			this._layout();
 
 			var val = this._calculateValue();
@@ -970,9 +970,10 @@
 			this.element.setAttribute('data', value);
 		},
 		_trigger: function(evt, val) {
+			val = val || undefined;
+
 			var callbackFn = this.eventToCallbackMap[evt];
 			if(callbackFn) {
-				val = val || undefined;
 				callbackFn(val);
 			}
 
@@ -982,8 +983,12 @@
 			}
 		},
 		_triggerJQueryEvent: function(evt, val) {
-			this.$element.trigger(evt, val);
-			this.$sliderElem.trigger(evt, val);
+			var eventData = {
+				type: evt,
+				value: val
+			};
+			this.$element.trigger(eventData);
+			this.$sliderElem.trigger(eventData);
 		},
 		_unbindJQueryEvents: function(evt, val) {
 			this.$element.off();
