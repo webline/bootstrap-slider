@@ -596,19 +596,19 @@ $("#ex11").slider({step: 20000, min: 0, max: 200000});
 
 			/* Example 9 */
 			$("#ex9").slider({
-				step: 0.01,
-				value: 8.115
+				precision: 2,
+				value: 8.115 
 			});
 
-      /* Example 10 */
-      $("#ex10").slider({});
+	      	/* Example 10 */
+	      	$("#ex10").slider({});
 
-      /* Example 11 */
-      $("#ex11").slider({
-        step: 20000,
-        min: 0,
-        max: 200000
-      });
+	      	/* Example 11 */
+	      	$("#ex11").slider({
+		        step: 20000,
+		        min: 0,
+		        max: 200000
+	      	});
 
     	});
     </script>

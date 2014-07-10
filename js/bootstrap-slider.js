@@ -776,6 +776,7 @@
 			if(!this.options.enabled) {
 				return false;
 			}
+
 			// Touch: Get the original event:
 			if (this.touchCapable && ev.type === 'touchstart') {
 				ev = ev.originalEvent;
@@ -818,6 +819,8 @@
 			this._trigger('slideStart', val);
 			this._setDataVal(val);
 			this.setValue(val);
+
+			this._pauseEvent(ev);
 
 			return true;
 		},
@@ -882,12 +885,25 @@
 			this._trigger('slideStop', val);
 			this._setDataVal(val);
 			
+			this._pauseEvent(ev);
+
 			return false;
+		},
+		_pauseEvent: function(ev) {
+			if(ev.stopPropagation) {
+				ev.stopPropagation();
+			}
+		    if(ev.preventDefault) {
+		    	ev.preventDefault();
+		    }
+		    ev.cancelBubble=true;
+		    ev.returnValue=false;			
 		},
 		_mousemove: function(ev) {
 			if(!this.options.enabled) {
 				return false;
 			}
+
 			// Touch: Get the original event:
 			if (this.touchCapable && ev.type === 'touchmove') {
 				ev = ev.originalEvent;
