@@ -1,5 +1,14 @@
 /* =========================================================
  * bootstrap-slider.js v3.0.0
+ *
+ * Maintainers: 
+ * 		Kyle Kemp 
+ *			- Twitter: @seiyra
+ *			- Github:  seiyra
+ * 		Rohit Kalkur
+ *			- Twitter: @Rovolutionary
+ *			- Github:  rovolution
+ *
  * =========================================================
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,134 +33,134 @@
 
 ( function( window ) {
 
-'use strict';
+	'use strict';
 
-// -------------------------- utils -------------------------- //
+	// -------------------------- utils -------------------------- //
 
-var slice = Array.prototype.slice;
+	var slice = Array.prototype.slice;
 
-function noop() {}
+	function noop() {}
 
-// -------------------------- definition -------------------------- //
+	// -------------------------- definition -------------------------- //
 
-function defineBridget( $ ) {
+	function defineBridget( $ ) {
 
-// bail if no jQuery
-if ( !$ ) {
-  return;
-}
+		// bail if no jQuery
+		if ( !$ ) {
+		  return;
+		}
 
-// -------------------------- addOptionMethod -------------------------- //
+		// -------------------------- addOptionMethod -------------------------- //
 
-/**
- * adds option method -> $().plugin('option', {...})
- * @param {Function} PluginClass - constructor class
- */
-function addOptionMethod( PluginClass ) {
-  // don't overwrite original option method
-  if ( PluginClass.prototype.option ) {
-    return;
-  }
+		/**
+		 * adds option method -> $().plugin('option', {...})
+		 * @param {Function} PluginClass - constructor class
+		 */
+		function addOptionMethod( PluginClass ) {
+		  // don't overwrite original option method
+		  if ( PluginClass.prototype.option ) {
+		    return;
+		  }
 
-  // option setter
-  PluginClass.prototype.option = function( opts ) {
-    // bail out if not an object
-    if ( !$.isPlainObject( opts ) ){
-      return;
-    }
-    this.options = $.extend( true, this.options, opts );
-  };
-}
+		  // option setter
+		  PluginClass.prototype.option = function( opts ) {
+		    // bail out if not an object
+		    if ( !$.isPlainObject( opts ) ){
+		      return;
+		    }
+		    this.options = $.extend( true, this.options, opts );
+		  };
+		}
 
 
-// -------------------------- plugin bridge -------------------------- //
+		// -------------------------- plugin bridge -------------------------- //
 
-// helper function for logging errors
-// $.error breaks jQuery chaining
-var logError = typeof console === 'undefined' ? noop :
-  function( message ) {
-    console.error( message );
-  };
+		// helper function for logging errors
+		// $.error breaks jQuery chaining
+		var logError = typeof console === 'undefined' ? noop :
+		  function( message ) {
+		    console.error( message );
+		  };
 
-/**
- * jQuery plugin bridge, access methods like $elem.plugin('method')
- * @param {String} namespace - plugin name
- * @param {Function} PluginClass - constructor class
- */
-function bridge( namespace, PluginClass ) {
-  // add to jQuery fn namespace
-  $.fn[ namespace ] = function( options ) {
-    if ( typeof options === 'string' ) {
-      // call plugin method when first argument is a string
-      // get arguments for method
-      var args = slice.call( arguments, 1 );
+		/**
+		 * jQuery plugin bridge, access methods like $elem.plugin('method')
+		 * @param {String} namespace - plugin name
+		 * @param {Function} PluginClass - constructor class
+		 */
+		function bridge( namespace, PluginClass ) {
+		  // add to jQuery fn namespace
+		  $.fn[ namespace ] = function( options ) {
+		    if ( typeof options === 'string' ) {
+		      // call plugin method when first argument is a string
+		      // get arguments for method
+		      var args = slice.call( arguments, 1 );
 
-      for ( var i=0, len = this.length; i < len; i++ ) {
-        var elem = this[i];
-        var instance = $.data( elem, namespace );
-        if ( !instance ) {
-          logError( "cannot call methods on " + namespace + " prior to initialization; " +
-            "attempted to call '" + options + "'" );
-          continue;
-        }
-        if ( !$.isFunction( instance[options] ) || options.charAt(0) === '_' ) {
-          logError( "no such method '" + options + "' for " + namespace + " instance" );
-          continue;
-        }
+		      for ( var i=0, len = this.length; i < len; i++ ) {
+		        var elem = this[i];
+		        var instance = $.data( elem, namespace );
+		        if ( !instance ) {
+		          logError( "cannot call methods on " + namespace + " prior to initialization; " +
+		            "attempted to call '" + options + "'" );
+		          continue;
+		        }
+		        if ( !$.isFunction( instance[options] ) || options.charAt(0) === '_' ) {
+		          logError( "no such method '" + options + "' for " + namespace + " instance" );
+		          continue;
+		        }
 
-        // trigger method with arguments
-        var returnValue = instance[ options ].apply( instance, args );
+		        // trigger method with arguments
+		        var returnValue = instance[ options ].apply( instance, args );
 
-        // break look and return first value if provided
-        if ( returnValue !== undefined ) {
-          return returnValue;
-        }
-      }
-      // return this if no return value
-      return this;
-    } else {
-      return this.each( function() {
-        var instance = $.data( this, namespace );
-        if ( instance ) {
-          // apply options & init
-          instance.option( options );
-          instance._init();
-        } else {
-          // initialize new instance
-          instance = new PluginClass( this, options );
-          $.data( this, namespace, instance );
-        }
-      });
-    }
-  };
+		        // break look and return first value if provided
+		        if ( returnValue !== undefined ) {
+		          return returnValue;
+		        }
+		      }
+		      // return this if no return value
+		      return this;
+		    } else {
+		      return this.each( function() {
+		        var instance = $.data( this, namespace );
+		        if ( instance ) {
+		          // apply options & init
+		          instance.option( options );
+		          instance._init();
+		        } else {
+		          // initialize new instance
+		          instance = new PluginClass( this, options );
+		          $.data( this, namespace, instance );
+		        }
+		      });
+		    }
+		  };
 
-}
+		}
 
-// -------------------------- bridget -------------------------- //
+		// -------------------------- bridget -------------------------- //
 
-/**
- * converts a Prototypical class into a proper jQuery plugin
- *   the class must have a ._init method
- * @param {String} namespace - plugin name, used in $().pluginName
- * @param {Function} PluginClass - constructor class
- */
-$.bridget = function( namespace, PluginClass ) {
-  addOptionMethod( PluginClass );
-  bridge( namespace, PluginClass );
-};
+		/**
+		 * converts a Prototypical class into a proper jQuery plugin
+		 *   the class must have a ._init method
+		 * @param {String} namespace - plugin name, used in $().pluginName
+		 * @param {Function} PluginClass - constructor class
+		 */
+		$.bridget = function( namespace, PluginClass ) {
+		  addOptionMethod( PluginClass );
+		  bridge( namespace, PluginClass );
+		};
 
-return $.bridget;
+		return $.bridget;
 
-}
+	}
 
-// transport
-if ( typeof define === 'function' && define.amd ) {
-  // AMD
-  define( [ 'jquery' ], defineBridget );
-} else {
-  // get jquery from browser global
-  defineBridget( window.jQuery );
-}
+	// transport
+	if ( typeof define === 'function' && define.amd ) {
+	  // AMD
+	  define( [ 'jquery' ], defineBridget );
+	} else {
+	  // get jquery from browser global
+	  defineBridget( window.jQuery );
+	}
 
 })( window );
 
@@ -185,7 +194,7 @@ if ( typeof define === 'function' && define.amd ) {
 
 		**************************************************/
 		if(typeof element === "string") {
-			this.element = document.querySelectorAll(element);
+			this.element = document.querySelector(element);
 		} else if(element instanceof HTMLElement) {
 			this.element = element;
 		}
@@ -223,7 +232,7 @@ if ( typeof define === 'function' && define.amd ) {
 
 			/* Create tooltip elements */
 			var sliderTooltip = document.createElement("div");
-			sliderTooltip.className = "tooltip";
+			sliderTooltip.className = "tooltip tooltip-main";
 			createAndAppendTooltipSubElements(sliderTooltip);
 
 			var sliderTooltipMin = document.createElement("div");
@@ -265,7 +274,7 @@ if ( typeof define === 'function' && define.amd ) {
 
 		**************************************************/
 		options = options ? options : {};
-		var optionTypes = Object.keys(this.options);
+		var optionTypes = Object.keys(this.defaultOptions);
 
 		for(var i = 0; i < optionTypes.length; i++) {
 			var optName = optionTypes[i];
@@ -275,8 +284,11 @@ if ( typeof define === 'function' && define.amd ) {
 			// If no data attrib, then check if an option was passed in via the constructor
 			val = val ? val : options[optName];
 			// Finally, if nothing was specified, use the defaults
-			val = val ? val : this.options[optName];
+			val = val ? val : this.defaultOptions[optName];
 
+			if(!this.options) {
+				this.options = {};
+			}
 			this.options[optName] = val;
 		}
 
@@ -302,7 +314,7 @@ if ( typeof define === 'function' && define.amd ) {
 
 		this.touchCapable = 'ontouchstart' in window || window.DocumentTouch && document instanceof window.DocumentTouch;
 
-		this.tooltip = this.sliderElem.querySelector('.tooltip');
+		this.tooltip = this.sliderElem.querySelector('.tooltip-main');
 		this.tooltipInner = this.tooltip.querySelector('.tooltip-inner');
 
 		this.tooltip_min = this.sliderElem.querySelector('.tooltip-min');
@@ -362,18 +374,13 @@ if ( typeof define === 'function' && define.amd ) {
 			this.options.value = [this.options.value, this.options.max];
 		}
 
-		this.selectionEl = sliderTrackSelection;
+		this.trackSelection = sliderTrackSelection;
 		if (this.options.selection === 'none') {
-			this._addClass(this.selectionEl, 'hide');
+			this._addClass(this.trackSelection, 'hide');
 		}
 
-		this.selectionElStyle = this.selectionEl.style;
-
 		this.handle1 = sliderMinHandle;
-		this.handle1Style = this.handle1.style;
-
 		this.handle2 = sliderMaxHandle;
-		this.handle2Style = this.handle2.style;
 
 		if (updateSlider === true) {
 			// Reset classes
@@ -458,7 +465,7 @@ if ( typeof define === 'function' && define.amd ) {
 	Slider.prototype = {
 		constructor: Slider,
 
-		options: {
+		defaultOptions: {
 			id: "",
 		  	min: 0,
 			max: 10,
@@ -505,7 +512,8 @@ if ( typeof define === 'function' && define.amd ) {
 				this.options.value[0] = Math.max(this.options.min, Math.min(this.options.max, this.options.value[0]));
 				this.options.value[1] = Math.max(this.options.min, Math.min(this.options.max, this.options.value[1]));
 			} else {
-				this.options.value = [ Math.max(this.min, Math.min(this.max, this.options.value))];
+				this.options.value = applyPrecision(this.options.value);
+				this.options.value = [ Math.max(this.options.min, Math.min(this.options.max, this.options.value))];
 				this._addClass(this.handle2, 'hide');
 				if (this.selection === 'after') {
 					this.options.value[1] = this.options.max;
@@ -628,15 +636,15 @@ if ( typeof define === 'function' && define.amd ) {
 				positionPercentages = [ this.percentage[0], this.percentage[1] ];
 			}
 
-			this.handle1Style[this.stylePos] = positionPercentages[0]+'%';
-			this.handle2Style[this.stylePos] = positionPercentages[1]+'%';
+			this.handle1.style[this.stylePos] = positionPercentages[0]+'%';
+			this.handle2.style[this.stylePos] = positionPercentages[1]+'%';
 
 			if (this.options.orientation === 'vertical') {
-				this.selectionElStyle.top = Math.min(positionPercentages[0], positionPercentages[1]) +'%';
-				this.selectionElStyle.height = Math.abs(positionPercentages[0] - positionPercentages[1]) +'%';
+				this.trackSelection.style.top = Math.min(positionPercentages[0], positionPercentages[1]) +'%';
+				this.trackSelection.style.height = Math.abs(positionPercentages[0] - positionPercentages[1]) +'%';
 			} else {
-				this.selectionElStyle.left = Math.min(positionPercentages[0], positionPercentages[1]) +'%';
-				this.selectionElStyle.width = Math.abs(positionPercentages[0] - positionPercentages[1]) +'%';
+				this.trackSelection.style.left = Math.min(positionPercentages[0], positionPercentages[1]) +'%';
+				this.trackSelection.style.width = Math.abs(positionPercentages[0] - positionPercentages[1]) +'%';
 
 		        var offset_min = this.tooltip_min.getBoundingClientRect();
 		        var offset_max = this.tooltip_max.getBoundingClientRect();
@@ -691,11 +699,10 @@ if ( typeof define === 'function' && define.amd ) {
 				}
 			} else {
 				var innerTooltipText = this.options.formatter(this.options.value[0]);
-				this._setText(this.tooltipInner_min, innerTooltipText);
+				this._setText(this.tooltipInner, innerTooltipText);
 
 				this.tooltip.style[this.stylePos] = positionPercentages[0] + '%';
 				if (this.options.orientation === 'vertical') {
-
 					this._css(this.tooltip, 'margin-top', -this.tooltip.offsetHeight / 2 + 'px');
 				} else {
 					this._css(this.tooltip, 'margin-left', -this.tooltip.offsetWidth / 2 + 'px');
@@ -950,9 +957,9 @@ if ( typeof define === 'function' && define.amd ) {
 			}
 		},
 		_setText: function(element, text) {
-			if(element.innerText) {
+			if(typeof element.innerText !== "undefined") {
 		 		element.innerText = text;
-		 	} else if(element.textContent) {
+		 	} else if(typeof element.textContent !== "undefined") {
 		 		element.textContent = text;
 		 	}
 		},
