@@ -599,6 +599,19 @@ describe("Public Method Tests", function() {
     expect(isRangeSlider).toBeFalsy();
   });
 
+  it("setAttribute: changes the 'data-slider-orientation' property from horizontal to vertical", function() {
+    testSlider = $("#changeOrientationSlider").slider({
+      id: "changeOrientationSliderElem"
+    });
+    testSlider.slider('setAttribute', 'orientation', 'vertical').slider('refresh');
+
+    var $slider = $("#changeOrientationSliderElem");
+    var orientationClassApplied = $slider.hasClass("slider-vertical");
+    var secondSliderHidden = $slider.find('.slider-handle').last().hasClass('hide');
+    expect(orientationClassApplied).toBeTruthy();
+    expect(secondSliderHidden).toBeTruthy();
+  });
+
   afterEach(function() {
     if(testSlider) {
       testSlider.slider('destroy');
