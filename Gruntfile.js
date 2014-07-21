@@ -50,6 +50,7 @@ module.exports = function(grunt) {
         src: '<%= pkg.gruntConfig.spec %>',
         options : {
           globals : {
+            document: true,
             console: false,
             $: false,
             _: false,

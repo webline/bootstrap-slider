@@ -838,7 +838,7 @@
 			}
 
 			var dir;
-			switch (ev.which) {
+			switch (ev.keyCode) {
 				case 37: // left
 				case 40: // down
 					dir = -1;
