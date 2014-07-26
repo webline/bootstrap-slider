@@ -195,6 +195,11 @@
 
 	**************************************************/
 	var Slider = function(element, options) {
+		createNewSlider.call(this, element, options);
+		return this;
+	};
+
+	function createNewSlider(element, options) {
 		/*************************************************
 					
 						Create Markup
@@ -467,9 +472,7 @@
 		} else {
 			this.disable();
 		}
-
-		return this;
-	};
+	}
 
 	/*************************************************
 					
@@ -641,6 +644,25 @@
 		},
 
 		data: function() {
+			return this;
+		},
+
+		getAttribute: function(attribute) {
+			if(attribute) {
+				return this.options[attribute];		
+			} else {
+				return this.options;
+			}
+		},
+
+		setAttribute: function(attribute, value) {
+			this.options[attribute] = value;
+			return this;
+		},
+
+		refresh: function() {
+			this.destroy();
+			createNewSlider.call(this, this.element, this.options);
 			return this;
 		},
 		

@@ -47,10 +47,12 @@ describe("Element Data Attributes Tests", function() {
   });
 
   it("reads the 'data-slider-selection' property and sets it on slider", function() {
-    slider = $("#selectionSlider").slider();
-    slider.slider('setValue', 10);
+    slider = $("#selectionSlider").slider({
+      id: "selectionSliderId"
+    });
+    slider.slider('setValue', 0);
 
-    var sliderSelectionWidthAtMaxValue = $("#selectionSlider").siblings("div.slider-track").children("div.slider-selection").width();
+    var sliderSelectionWidthAtMaxValue = $("#selectionSlider").siblings("#selectionSliderId").children("div.slider-track").children("div.slider-selection").width();
     expect(sliderSelectionWidthAtMaxValue).toBe(0);
   });
 
