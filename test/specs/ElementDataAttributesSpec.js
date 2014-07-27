@@ -52,31 +52,44 @@ describe("Element Data Attributes Tests", function() {
     });
     slider.slider('setValue', 0);
 
-    var sliderSelectionWidthAtMaxValue = $("#selectionSlider").siblings("#selectionSliderId").children("div.slider-track").children("div.slider-selection").width();
-    expect(sliderSelectionWidthAtMaxValue).toBe(0);
+    var newSliderValue = slider.slider('getValue');
+    expect(newSliderValue).toBe(0);
   });
 
   it("reads the 'data-slider-tooltip' property and sets it on slider", function() {
-    slider = $("#tooltipSlider").slider();
-    var tooltipIsHidden = $("#tooltipSlider").siblings("div.tooltip").hasClass("hide");
+    slider = $("#tooltipSlider").slider({
+      id: "tooltipSliderElem"
+    });
+    var tooltipIsHidden = $("#tooltipSliderElem").children("div.tooltip").hasClass("hide");
     expect(tooltipIsHidden).toBeTruthy();
   });
 
-  it("reads the 'data-slider-handle' property and sets it on slider", function() {
-    slider = $("#handleSlider").slider();
-    var handleIsSetToTriangle = $("#handleSlider").siblings("div.slider-track").children("div.slider-handle").hasClass("triangle");
-    expect(handleIsSetToTriangle).toBeTruthy();
+  describe("reads the 'data-slider-handle' property and sets it on slider", function() {
+    it("applies 'triangle' class tag to handle", function() {
+      slider = $("#handleSlider").slider({
+        id: "handleSliderElem"
+      });
+      var handleIsSetToTriangle = $("#handleSliderElem div.slider-track").children("div.slider-handle").hasClass("triangle");
+      expect(handleIsSetToTriangle).toBeTruthy();
+    });
 
-    slider = $("#customHandleSlider").slider();
-    var handleIsSetToCustom = $("#customHandleSlider").siblings("div.slider-track").children("div.slider-handle").hasClass("custom");
-    expect(handleIsSetToCustom).toBeTruthy();
+    it("applies 'custom' class tag to handle", function() {
+      slider = $("#customHandleSlider").slider({
+        id: "customHandleSliderElem"
+      });
+      var handleIsSetToCustom = $("#customHandleSliderElem div.slider-track").children("div.slider-handle").hasClass("custom");
+      expect(handleIsSetToCustom).toBeTruthy();
+    });
   });
 
+
   it("reads the 'data-slider-reversed' property and sets it on slider", function() {
-    slider = $("#reversedSlider").slider();
+    slider = $("#reversedSlider").slider({
+      id: "reversedSliderElem"  
+    });
     slider.slider('setValue', 10);
       
-    var sliderSelectionHeightAtMaxValue = $("#reversedSlider").siblings("div.slider-track").children("div.slider-selection").width();
+    var sliderSelectionHeightAtMaxValue = $("#reversedSliderElem div.slider-track").children("div.slider-selection").width();
     expect(sliderSelectionHeightAtMaxValue).toBe(0);
   });
 
@@ -84,17 +97,6 @@ describe("Element Data Attributes Tests", function() {
     slider = $("#disabledSlider").slider();
     var isEnabled = slider.slider('isEnabled');
     expect(isEnabled).not.toBeTruthy();
-  });
-
-  it("changes the 'data-slider-orientation' property from horizontal to vertical", function() {
-    slider = $("#changeOrientationSlider").slider();
-    slider.slider('setAttribute', 'orientation', 'vertical').slider('refresh');
-
-    var $slider = $("#changeOrientationSlider").parent("div.slider");
-    var orientationClassApplied = $slider.hasClass("slider-vertical");
-    var secondSliderHidden = $slider.find('.slider-handle').last().hasClass('hide');
-    expect(orientationClassApplied).toBeTruthy();
-    expect(secondSliderHidden).toBeTruthy();
   });
 
   afterEach(function() {

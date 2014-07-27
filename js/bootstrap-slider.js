@@ -213,17 +213,13 @@
 		
 		var origWidth = this.element.style.width;
 		var updateSlider = false;
-
 		var parent = this.element.parentNode;
-		var sliderAlreadyExists = parent.className.search("(?:\\s|^)slider(?:\\s|$)") !== -1;
-
 		var sliderTrackSelection;
 		var sliderMinHandle;
 		var sliderMaxHandle;
 
-		if (sliderAlreadyExists) {
+		if (this.sliderElem) {
 			updateSlider = true;
-			this.sliderElem = parent;
 		} else {
 			/* Create elements needed for slider */
 			this.sliderElem = document.createElement("div");
@@ -396,13 +392,13 @@
 			this.options.value = [this.options.value, this.options.max];
 		}
 
-		this.trackSelection = sliderTrackSelection;
+		this.trackSelection = sliderTrackSelection || this.trackSelection;
 		if (this.options.selection === 'none') {
 			this._addClass(this.trackSelection, 'hide');
 		}
 
-		this.handle1 = sliderMinHandle;
-		this.handle2 = sliderMaxHandle;
+		this.handle1 = sliderMinHandle || this.handle1;
+		this.handle2 = sliderMaxHandle || this.handle2;
 
 		if (updateSlider === true) {
 			// Reset classes
@@ -568,21 +564,8 @@
 		},
 
 		destroy: function(){
-			// Remove event listeners from handle1
-			this.handle1.removeEventListener("keydown", this.handle1Keydown, false);
-			this.handle1.removeEventListener("focus", this.showTooltip, false);
-			this.handle1.removeEventListener("blur", this.hideTooltip, false);
-
-			// Remove event listeners from handle2
-			this.handle2.removeEventListener("keydown", this.handle2Keydown, false);
-			this.handle2.removeEventListener("focus", this.handle2Keydown, false);
-			this.handle2.removeEventListener("blur", this.handle2Keydown, false);
-
-			// Remove event listeners from sliderElem
-			this.sliderElem.removeEventListener("mouseenter", this.showTooltip, false);
-			this.sliderElem.removeEventListener("mouseleave", this.hideTooltip, false);
-			this.sliderElem.removeEventListener("touchstart", this.mousedown, false);
-			this.sliderElem.removeEventListener("mousedown", this.mousedown, false);
+			// Remove event handlers on slider elements
+			this._removeSliderEventHandlers();
 
 			// Remove the slider from the DOM
 			this.sliderElem.parentNode.removeChild(this.sliderElem);
@@ -661,8 +644,12 @@
 		},
 
 		refresh: function() {
-			this.destroy();
+			this._removeSliderEventHandlers();
 			createNewSlider.call(this, this.element, this.options);
+			if($) {
+				// Bind new instance of slider to the element
+				$.data(this.element, 'slider', this);
+			}
 			return this;
 		},
 		
@@ -676,6 +663,23 @@
 		  					_fnName : function() {...}
 
 		********************************/
+		_removeSliderEventHandlers: function() {
+			// Remove event listeners from handle1
+			this.handle1.removeEventListener("keydown", this.handle1Keydown, false);
+			this.handle1.removeEventListener("focus", this.showTooltip, false);
+			this.handle1.removeEventListener("blur", this.hideTooltip, false);
+
+			// Remove event listeners from handle2
+			this.handle2.removeEventListener("keydown", this.handle2Keydown, false);
+			this.handle2.removeEventListener("focus", this.handle2Keydown, false);
+			this.handle2.removeEventListener("blur", this.handle2Keydown, false);
+
+			// Remove event listeners from sliderElem
+			this.sliderElem.removeEventListener("mouseenter", this.showTooltip, false);
+			this.sliderElem.removeEventListener("mouseleave", this.hideTooltip, false);
+			this.sliderElem.removeEventListener("touchstart", this.mousedown, false);
+			this.sliderElem.removeEventListener("mousedown", this.mousedown, false);
+		},
 		_bindNonQueryEventHandler: function(evt, callback) {
 			var callbacksArray = this.eventToCallbackMap[evt];
 			if(callbacksArray) {
@@ -860,7 +864,7 @@
 			}
 
 			var dir;
-			switch (ev.which) {
+			switch (ev.keyCode) {
 				case 37: // left
 				case 40: // down
 					dir = -1;

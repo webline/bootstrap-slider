@@ -50,6 +50,7 @@ module.exports = function(grunt) {
         src: '<%= pkg.gruntConfig.spec %>',
         options : {
           globals : {
+            document: true,
             console: false,
             $: false,
             _: false,
@@ -179,7 +180,7 @@ module.exports = function(grunt) {
   // Default task.
   grunt.registerTask('test', ['jshint', 'jasmine']);
   grunt.registerTask('build', ['less:development', 'test', 'template']);
-  grunt.registerTask('development', ['connect', 'open:development', 'watch']);
+  grunt.registerTask('development', ['template', 'connect', 'open:development', 'watch']);
   grunt.registerTask('production', ['less:production', 'less:production-min', 'test', 'uglify']);
   grunt.registerTask('dev', 'development');
   grunt.registerTask('dist', 'production');

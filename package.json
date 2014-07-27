@@ -50,7 +50,7 @@
       "css": "dist/css/bootstrap-slider.css",
       "cssMin": "dist/css/bootstrap-slider.min.css"
     },
-    "spec": "test/specs/ElementDataAttributesSpec.js"
+    "spec": "test/specs/PublicMethodsSpec.js"
   },
   "devDependencies": {
     "grunt": "~0.4.4"
