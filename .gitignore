@@ -4,3 +4,8 @@ bower_components
 css/
 .grunt/*
 _SpecRunner.html
+.sass-cache
+stylesheets
+compass_app_log.txt
+npm-debug.log
+test
